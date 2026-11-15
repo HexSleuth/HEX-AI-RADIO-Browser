@@ -1,0 +1,2688 @@
+<!doctype html>
+<html lang="en" data-theme="hex">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0f16" />
+<title>HEX-AI RADIO Browser</title>
+<meta name="description" content="HEX AI-RADIO — 50k+ internet radio stations, free keyless AI, r.jina.ai proxy, FFmpeg libav* stack, 33 themes + custom palette, Radio Browser data API (4 contracts), HEX-RADIO live URL sync." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📻</text></svg>" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  :root{
+    --p:#38e0b0; --s:#2bbf96; --a:#7c6cff; --n:#141b2a;
+    --b1:#0b0f16; --b2:#141b2a; --b3:#232d42; --bc:#e8edf7;
+    --er:#ff5d6c; --wa:#ffb454; --su:#38e0b0;
+    --bg: var(--b1); --bg2: var(--b2); --card: var(--b2); --card2: var(--b3);
+    --line: var(--b3); --txt: var(--bc);
+    --dim: color-mix(in srgb, var(--bc) 58%, transparent);
+    --acc: var(--p); --acc2: var(--a); --danger: var(--er); --warn: var(--wa); --success: var(--su);
+    --r:14px; --shadow:0 10px 30px rgba(0,0,0,.35); --shadow-lg:0 20px 60px rgba(0,0,0,.5);
+    --ease:cubic-bezier(.2,.8,.3,1);
+  }
+  *{box-sizing:border-box}
+  /* BUGFIX: enforce [hidden] regardless of display rules on same element */
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  html{transition:background .3s var(--ease)}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 600px at 15% -10%, color-mix(in srgb, var(--p) 22%, transparent) 0%, transparent 55%),
+      radial-gradient(900px 500px at 95% 0%, color-mix(in srgb, var(--a) 20%, transparent) 0%, transparent 50%),
+      var(--bg);
+    color:var(--txt);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    transition:background .3s var(--ease), color .3s var(--ease);
+  }
+  a{color:var(--acc)}
+  button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+  input,select,textarea{font:inherit;color:inherit}
+  i.fa-solid,i.fa-regular,i.fa-brands{line-height:1}
+
+  header{
+    position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--line);
+    padding:10px 16px calc(10px + env(safe-area-inset-top));
+  }
+  .bar{display:flex;gap:10px;align-items:center;max-width:1240px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.2px;white-space:nowrap}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 14px var(--acc);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+  .brand small{display:block;font-weight:500;font-size:11px;color:var(--dim);letter-spacing:0}
+  .brand i.hex-logo{color:var(--acc);font-size:20px}
+  .search{flex:1;display:flex;align-items:center;gap:8px;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:0 6px 0 14px;height:44px;transition:border-color .18s,box-shadow .18s}
+  .search:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb, var(--acc) 18%, transparent)}
+  .search i{color:var(--dim);flex:none;font-size:15px}
+  .search input{flex:1;min-width:0;background:none;border:0;outline:0;height:100%}
+  .search input::placeholder{color:color-mix(in srgb, var(--bc) 38%, transparent)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;white-space:nowrap;transition:.16s var(--ease)}
+  .btn:hover{background:var(--card2);border-color:color-mix(in srgb, var(--acc) 40%, var(--line))}
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(135deg,var(--acc),color-mix(in srgb, var(--acc) 70%, #000));color: color-mix(in srgb, var(--b1) 95%, #000);border-color:transparent}
+  .btn.primary:hover{filter:brightness(1.08);box-shadow:0 0 20px color-mix(in srgb, var(--acc) 40%, transparent)}
+  .btn.icon-btn{padding:0;width:44px}
+  .btn i{font-size:16px}
+
+  nav.tabs{max-width:1240px;margin:10px auto 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  nav.tabs::-webkit-scrollbar{display:none}
+  .tab{padding:7px 14px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--dim);border:1px solid transparent;white-space:nowrap;transition:.15s}
+  .tab:hover{color:var(--txt);background:color-mix(in srgb, var(--bc) 6%, transparent)}
+  .tab[aria-selected="true"]{color: color-mix(in srgb, var(--b1) 95%, #000);background:var(--acc);border-color:var(--acc)}
+  .tab i{margin-right:5px}
+
+  main{max-width:1240px;margin:0 auto;padding:16px}
+  details.filters{margin-bottom:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);overflow:hidden}
+  details.filters>summary{list-style:none;cursor:pointer;padding:12px 16px;font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px;color:var(--dim);user-select:none}
+  details.filters>summary::-webkit-details-marker{display:none}
+  details.filters>summary::after{content:"\f078";font-family:"Font Awesome 6 Free";font-weight:900;margin-left:auto;transition:.2s;font-size:11px}
+  details.filters[open]>summary::after{transform:rotate(180deg)}
+  details.filters[open]>summary{color:var(--txt);border-bottom:1px solid var(--line)}
+  .filters-grid{display:grid;gap:12px;padding:14px 16px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+  .filters-actions{display:flex;gap:10px;padding:0 16px 14px;flex-wrap:wrap;align-items:center}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .field label{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--dim)}
+  .field select,.field input{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:9px 10px;outline:0;width:100%;font-size:14px}
+  .field select:focus,.field input:focus{border-color:var(--acc)}
+
+  .jina-toggle{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;cursor:pointer;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--dim);transition:.15s}
+  .jina-toggle:hover{color:var(--txt);border-color:color-mix(in srgb, var(--acc) 40%, var(--line))}
+  .jina-toggle input{accent-color:var(--acc2);margin:0}
+  .jina-toggle.on{color:var(--acc2);border-color:color-mix(in srgb, var(--acc2) 40%, transparent);background:color-mix(in srgb, var(--acc2) 10%, transparent)}
+  .proxy-status{font-size:11.5px;font-weight:700;letter-spacing:.4px;padding:6px 12px;border-radius:999px;background:color-mix(in srgb, var(--acc) 14%, transparent);color:var(--acc);align-self:center;white-space:nowrap}
+  .proxy-status.jina{background:color-mix(in srgb, var(--acc2) 16%, transparent);color:var(--acc2)}
+  .proxy-status.err{background:color-mix(in srgb, var(--er) 16%, transparent);color:var(--er)}
+
+  #ai-panel{margin-bottom:16px;padding:16px;border-radius:var(--r);background:linear-gradient(135deg,color-mix(in srgb, var(--acc2) 14%, transparent),color-mix(in srgb, var(--acc) 8%, transparent));border:1px solid color-mix(in srgb, var(--acc2) 34%, transparent)}
+  #ai-panel h2{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  #ai-panel>p{margin:0 0 12px;color:var(--dim);font-size:13px}
+  .ai-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  #ai-prompt{flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;outline:0;font-size:14px}
+  #ai-prompt:focus{border-color:var(--acc2)}
+  .ai-models{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .model-pill{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--bc) 5%, transparent);border:1px solid var(--line);color:var(--dim);cursor:pointer;transition:.15s}
+  .model-pill:hover{color:var(--txt);border-color:color-mix(in srgb, var(--acc) 30%, var(--line))}
+  .model-pill.on{background:var(--acc2);color:#fff;border-color:var(--acc2)}
+  .ai-status{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--dim);min-height:22px;font-weight:500}
+  .ai-status.ok{color:var(--acc)}
+  .ai-status.err{color:var(--danger)}
+  .ai-spinner{width:16px;height:16px;flex:none;border:2px solid color-mix(in srgb, var(--acc) 25%, transparent);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;display:none}
+  .ai-status.loading .ai-spinner{display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ai-progress{height:3px;background:color-mix(in srgb, var(--bc) 8%, transparent);border-radius:2px;margin-top:10px;overflow:hidden}
+  .ai-progress-inner{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));width:0;transition:width .3s}
+
+  .section-head{display:flex;align-items:baseline;gap:10px;margin:2px 2px 12px;flex-wrap:wrap}
+  .section-head h2{font-size:15px;margin:0;font-weight:700}
+  .section-head .count{font-size:12.5px;color:var(--dim)}
+  #grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(272px,1fr))}
+  .card{display:flex;gap:12px;align-items:center;padding:11px;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:var(--r);transition:transform .15s var(--ease),border-color .15s,background .15s,box-shadow .15s;position:relative;overflow:hidden}
+  .card:hover{background:var(--card2);border-color:color-mix(in srgb, var(--acc) 40%, var(--line));transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.15)}
+  .card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  .card.playing{border-color:var(--acc);background:linear-gradient(180deg,color-mix(in srgb, var(--acc) 12%, transparent),color-mix(in srgb, var(--acc) 4%, transparent))}
+  .card.playing::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc);box-shadow:0 0 14px var(--acc)}
+  .logo{position:relative;width:52px;height:52px;flex:none;border-radius:11px;overflow:hidden;background:linear-gradient(135deg,var(--card2),color-mix(in srgb, var(--card2) 70%, #000));display:grid;place-items:center}
+  .logo span{position:absolute;font-weight:800;font-size:19px;color:color-mix(in srgb, var(--bc) 45%, transparent)}
+  .logo img{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+  .meta{min-width:0;flex:1}
+  .meta h3{margin:0 0 2px;font-size:14.5px;font-weight:700;letter-spacing:-.1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .meta .sub{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chips{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+  .chip{font-size:10.5px;font-weight:700;letter-spacing:.3px;padding:2px 7px;border-radius:6px;background:color-mix(in srgb, var(--acc2) 18%, transparent);color:color-mix(in srgb, var(--acc2) 85%, var(--bc));text-transform:uppercase}
+  .chip.warn{background:color-mix(in srgb, var(--er) 18%, transparent);color:color-mix(in srgb, var(--er) 85%, var(--bc))}
+  .chip.ai{background:color-mix(in srgb, var(--acc) 18%, transparent);color:var(--acc)}
+  .chip.live{background:color-mix(in srgb, var(--su) 22%, transparent);color:var(--su)}
+  .fav{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:color-mix(in srgb, var(--bc) 32%, transparent);transition:.15s;font-size:15px}
+  .fav:hover{background:color-mix(in srgb, var(--bc) 8%, transparent);color:var(--danger)}
+  .fav.on{color:var(--danger)}
+  .empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--dim);border:1px dashed var(--line);border-radius:var(--r)}
+  .empty b{display:block;color:var(--txt);font-size:16px;margin-bottom:6px}
+  .skeleton{height:76px;border-radius:var(--r);background:linear-gradient(100deg,var(--card) 30%,var(--card2) 50%,var(--card) 70%);background-size:220% 100%;animation:sk 1.2s infinite}
+  @keyframes sk{to{background-position:-120% 0}}
+  .more{display:flex;justify-content:center;margin:20px 0 4px;gap:10px;flex-wrap:wrap}
+
+  /* ===== LOAD MORE PROGRESS CIRCLE ===== */
+  .more .btn .btn-spinner{
+    display:none;
+    width:16px;height:16px;flex:none;border-radius:50%;
+    border:2px solid color-mix(in srgb, var(--bc) 20%, transparent);
+    border-top-color:var(--acc);
+    animation:spin .7s linear infinite;
+  }
+  .more .btn.loading .btn-spinner{display:inline-block}
+  .more .btn.loading > i{display:none}
+  .more .btn.loading{pointer-events:none;opacity:.9}
+  .more-loader{
+    display:flex;justify-content:center;align-items:center;gap:14px;
+    padding:0 16px;color:var(--dim);
+    font-size:13.5px;font-weight:500;
+    opacity:0;max-height:0;overflow:hidden;
+    transition:opacity .25s var(--ease),max-height .3s var(--ease),padding .3s var(--ease);
+  }
+  .more-loader.show{
+    opacity:1;max-height:100px;padding:20px 16px 4px;
+  }
+  .spinner-ring{
+    width:28px;height:28px;flex:none;border-radius:50%;
+    background:conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, var(--acc) 35%, transparent) 90deg, var(--acc) 360deg);
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3.5px));
+    mask:radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3.5px));
+    animation:spin .85s linear infinite;
+    box-shadow:0 0 14px color-mix(in srgb, var(--acc) 35%, transparent);
+  }
+  .more-loader-text{letter-spacing:.2px}
+  .more-loader-text b{color:var(--acc);font-weight:700}
+
+  /* ===== DATA PANEL ===== */
+  #data-panel{padding-bottom:8px}
+  .data-hero{margin-bottom:14px}
+  .data-hero h2{margin:0 0 6px;font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .data-hero p{margin:0;color:var(--dim);font-size:13.5px;line-height:1.55;max-width:880px}
+  .data-hero code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:color-mix(in srgb, var(--bc) 8%, transparent);padding:2px 7px;border-radius:5px;border:1px solid color-mix(in srgb, var(--bc) 10%, transparent)}
+  .data-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-bottom:12px}
+  .data-grid .data-card{margin-bottom:0}
+  .data-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .data-card h3{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .data-card p{margin:0 0 10px;color:var(--dim);font-size:13px}
+  .data-card p:last-child{margin-bottom:0}
+  .data-card code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:color-mix(in srgb, var(--bc) 8%, transparent);padding:2px 6px;border-radius:5px;border:1px solid color-mix(in srgb, var(--bc) 10%, transparent)}
+  .data-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:color-mix(in srgb, var(--acc2) 18%, transparent);color:var(--acc2);text-transform:uppercase;letter-spacing:.4px}
+  .data-kv{display:grid;gap:7px;margin-top:10px}
+  .data-kv>div{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;flex-wrap:wrap;align-items:center}
+  .data-kv>div span{color:var(--dim);font-weight:600}
+  .data-kv>div a{color:var(--acc);font-weight:600}
+  .data-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .data-tag{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--acc) 14%, transparent);color:var(--acc);border:1px solid color-mix(in srgb, var(--acc) 30%, transparent)}
+  .contract-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:6px}
+  .contract{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+  .contract-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .contract-id{font-size:9.5px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:5px;background:color-mix(in srgb, var(--acc2) 20%, transparent);color:var(--acc2)}
+  .contract h4{margin:0;font-size:13px}
+  .contract p{margin:0;font-size:12px;color:var(--dim)}
+  .contract-ep{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+  .contract-ep code{display:block;font-size:11px;cursor:pointer;padding:5px 7px;border-radius:6px;background:color-mix(in srgb, var(--bc) 5%, transparent);border:1px solid transparent;transition:.15s;word-break:break-all;color:var(--txt)}
+  .contract-ep code:hover{border-color:color-mix(in srgb, var(--acc) 40%, transparent);background:color-mix(in srgb, var(--acc) 8%, transparent)}
+  .status-ok{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--acc)}
+  .status-err{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--danger)}
+  .status-yes{color:var(--acc)}
+  .pool-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:2px}
+  .pool-table th,.pool-table td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  .pool-table th{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .pool-table code{font-size:11px}
+  .pill-ok{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;background:color-mix(in srgb, var(--su) 18%, transparent);color:var(--su)}
+  #data-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}
+  #data-stats .stat{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+  #data-stats .stat b{display:block;font-size:18px;color:var(--acc)}
+  #data-stats .stat span{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px}
+  .ep-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);margin-bottom:6px;transition:.15s;font-size:12px;color:var(--txt)}
+  .ep-row:last-child{margin-bottom:0}
+  .ep-row:hover{border-color:color-mix(in srgb, var(--acc) 40%, var(--line));background:color-mix(in srgb, var(--acc) 6%, transparent)}
+  .ep-row code{background:none;border:0;padding:0;font-size:12px;word-break:break-all}
+  .ep-row i{color:var(--dim);flex:none}
+  .data-sub{font-size:12px!important}
+
+  #player{position:fixed;left:0;right:0;bottom:0;z-index:50;background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .3s var(--ease)}
+  #player.show{transform:none}
+  .player-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  .p-art{position:relative;width:46px;height:46px;border-radius:10px;overflow:hidden;flex:none;background:linear-gradient(135deg,var(--card2),color-mix(in srgb, var(--card2) 70%, #000));display:grid;place-items:center;cursor:pointer}
+  .p-art img{width:100%;height:100%;object-fit:cover}
+  .p-art .ai-tag{position:absolute;bottom:2px;right:2px;font-size:8px;background:var(--acc2);color:#fff;padding:1px 3px;border-radius:3px;font-weight:800}
+  .p-info{min-width:0;flex:1}
+  .p-info .t{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-info .s{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-controls{display:flex;align-items:center;gap:4px}
+  .p-btn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;transition:.15s;color:var(--txt);font-size:16px}
+  .p-btn:hover{background:color-mix(in srgb, var(--bc) 10%, transparent)}
+  .p-btn.main{background:var(--acc);color:color-mix(in srgb, var(--b1) 95%, #000);width:46px;height:46px;font-size:18px}
+  .p-btn.main:hover{filter:brightness(1.1);box-shadow:0 0 20px color-mix(in srgb, var(--acc) 50%, transparent)}
+  .vol{display:flex;align-items:center;gap:7px;width:130px}
+  .vol i{color:var(--dim);flex:none;font-size:14px}
+  .vol input{width:100%;accent-color:var(--acc);height:4px}
+  .eq{display:flex;gap:2px;align-items:flex-end;height:14px;flex:none;opacity:0;transition:.2s}
+  .eq.on{opacity:1}
+  .eq i{width:3px;background:var(--acc);border-radius:2px;animation:eq .9s ease-in-out infinite;display:block;height:4px}
+  .eq i:nth-child(2){animation-delay:.15s}
+  .eq i:nth-child(3){animation-delay:.3s}
+  .eq i:nth-child(4){animation-delay:.45s}
+  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
+
+  /* ===== THEME PANEL ===== */
+  #theme-panel{position:fixed;top:66px;right:16px;z-index:200;background:color-mix(in srgb, var(--bg) 96%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-lg);width:min(480px,calc(100vw - 32px));max-height:calc(100vh - 90px);display:flex;flex-direction:column;overflow:hidden;transform-origin:top right;transition:opacity .2s,transform .2s var(--ease)}
+  #theme-panel:not([hidden]){opacity:1;transform:scale(1)}
+  .theme-panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;flex:none}
+  .theme-panel-head>span i{margin-right:8px;color:var(--acc)}
+  .theme-panel-head button{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--dim);transition:.15s}
+  .theme-panel-head button:hover{background:color-mix(in srgb, var(--bc) 10%, transparent);color:var(--txt)}
+  .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding:12px;overflow-y:auto;scrollbar-width:thin;flex:0 1 auto;min-height:0}
+  .theme-card{cursor:pointer;border:2px solid transparent;border-radius:10px;overflow:hidden;background:var(--card);transition:.15s var(--ease);padding:0;display:flex;flex-direction:column;align-items:stretch;text-align:left}
+  .theme-card:hover{border-color:color-mix(in srgb, var(--acc) 40%, transparent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+  .theme-card.active{border-color:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb, var(--acc) 30%, transparent)}
+  .swatch-strip{display:flex;height:22px}
+  .swatch-strip span{flex:1;display:block}
+  .theme-label{padding:7px 8px;font-size:11px;font-weight:700;text-transform:capitalize;display:flex;align-items:center;justify-content:space-between;gap:4px;color:var(--txt)}
+  .theme-card.active .theme-label::after{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--acc);font-size:10px}
+
+  .theme-custom-section{border-top:1px solid var(--line);flex:0 0 auto;background:color-mix(in srgb, var(--bg2) 60%, transparent)}
+  .theme-custom-section>summary{list-style:none;cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:var(--dim);user-select:none;display:flex;align-items:center;gap:8px}
+  .theme-custom-section>summary::-webkit-details-marker{display:none}
+  .theme-custom-section>summary::before{content:"\f054";font-family:"Font Awesome 6 Free";font-weight:900;display:inline-block;margin-right:2px;transition:.15s;font-size:9px}
+  .theme-custom-section[open]>summary::before{transform:rotate(90deg)}
+  .theme-custom-section[open]>summary{color:var(--txt);border-bottom:1px solid var(--line)}
+  .theme-custom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:8px;padding:12px 16px}
+  .cc-field{display:flex;flex-direction:column;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-width:0}
+  .cc-field span{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cc-field input[type="color"]{width:100%;height:30px;border:1px solid color-mix(in srgb, var(--bc) 12%, transparent);border-radius:6px;cursor:pointer;padding:0;background:none;-webkit-appearance:none;appearance:none}
+  .cc-field input[type="color"]::-webkit-color-swatch-wrapper{padding:0}
+  .cc-field input[type="color"]::-webkit-color-swatch{border:0;border-radius:5px}
+  .cc-field input[type="color"]::-moz-color-swatch{border:0;border-radius:5px}
+  .theme-custom-actions{display:flex;gap:8px;padding:0 16px 14px;flex-wrap:wrap}
+  .theme-custom-actions .btn{height:36px;padding:0 14px;font-size:12.5px}
+
+  .dark-toggle{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--dim);transition:.15s;position:relative}
+  .dark-toggle:hover{background:color-mix(in srgb, var(--bc) 10%, transparent);color:var(--txt)}
+  .dark-toggle input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+  .dark-toggle i::before{content:"\f185"}
+  .dark-toggle:has(input:checked){color:var(--acc2)}
+  .dark-toggle:has(input:checked) i::before{content:"\f186"}
+
+  /* ===== MODAL ===== */
+  .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);padding:16px}
+  .modal-box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;max-width:720px;width:100%;box-shadow:var(--shadow-lg);max-height:92vh;overflow-y:auto}
+  .modal-box h3{margin:0 0 6px;font-size:17px;display:flex;align-items:center;gap:8px}
+  .modal-box .subtitle{font-size:12.5px;color:var(--dim);margin:0 0 14px}
+  .lib-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:color-mix(in srgb, var(--acc) 8%, transparent);border:1px solid color-mix(in srgb, var(--acc) 22%, transparent);font-size:12.5px;color:var(--dim);margin-bottom:14px;flex-wrap:wrap}
+  .lib-banner.ok{background:color-mix(in srgb, var(--acc) 12%, transparent)}
+  .lib-banner .libs{display:flex;gap:5px;flex-wrap:wrap}
+  .lib-tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:color-mix(in srgb, var(--bc) 8%, transparent);color:var(--acc);border:1px solid color-mix(in srgb, var(--acc) 30%, transparent)}
+  .lib-tag.loaded{background:color-mix(in srgb, var(--acc) 20%, transparent)}
+  .lib-tag.pending{opacity:.55}
+  .ff-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  .ff-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .ff-field.ff-full{grid-column:1/-1}
+  .ff-field label{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--dim)}
+  .ff-field select,.ff-field input[type="number"],.ff-field input[type="text"]{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:0;width:100%;font-size:13.5px}
+  .ff-field select:focus,.ff-field input:focus{border-color:var(--acc)}
+  .ff-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt);cursor:pointer;padding:8px 0}
+  .ff-check input{accent-color:var(--acc2);margin:0;width:16px;height:16px;cursor:pointer}
+  .ff-progress-wrap{margin-bottom:12px}
+  .ff-progress-bar{height:6px;background:color-mix(in srgb, var(--bc) 8%, transparent);border-radius:3px;overflow:hidden;margin-bottom:6px}
+  .ff-progress-inner{height:100%;width:0;background:linear-gradient(90deg,var(--acc2),var(--acc));border-radius:3px;transition:width .2s ease}
+  .ff-progress-text{font-size:12px;color:var(--dim);text-align:right;font-family:ui-monospace,monospace}
+  .dl-status{font-size:13px;color:var(--dim);min-height:20px;margin-bottom:12px;word-break:break-word;padding:10px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--line);display:none}
+  .dl-status.show{display:block}
+  .dl-status.err{color:var(--danger);border-color:color-mix(in srgb, var(--er) 30%, transparent);background:color-mix(in srgb, var(--er) 6%, transparent)}
+  .dl-status.ok{color:var(--acc);border-color:color-mix(in srgb, var(--acc) 30%, transparent);background:color-mix(in srgb, var(--acc) 6%, transparent)}
+  details.ff-log{margin-bottom:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);overflow:hidden}
+  details.ff-log>summary{list-style:none;cursor:pointer;padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--dim);user-select:none}
+  details.ff-log>summary::-webkit-details-marker{display:none}
+  details.ff-log>summary::before{content:"\f054";font-family:"Font Awesome 6 Free";font-weight:900;display:inline-block;margin-right:8px;transition:.15s;font-size:9px}
+  details.ff-log[open]>summary::before{transform:rotate(90deg)}
+  details.ff-log pre{margin:0;padding:10px 14px;background:color-mix(in srgb, var(--bg) 80%, #000);color:var(--dim);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.5;max-height:180px;overflow:auto;border-top:1px solid var(--line)}
+  .modal-actions{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .modal-actions .right{display:flex;gap:8px;flex-wrap:wrap}
+
+  #toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:11px 18px;border-radius:999px;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.25s var(--ease);z-index:300;max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+  footer{max-width:1240px;margin:30px auto 0;padding:18px 16px;color:var(--dim);font-size:12px;text-align:center;line-height:1.7}
+  footer a{transition:.15s}
+  footer a:hover{text-shadow:0 0 10px currentColor}
+
+  .country-card .logo span{font-size:26px !important;position:static;color:inherit}
+
+  @media(max-width:640px){
+    .brand small{display:none}
+    .brand span small{display:none}
+    .brand i.hex-logo{font-size:18px}
+    .btn .lbl{display:none}
+    .btn.primary{padding:0 14px}
+    .vol{display:none}
+    #grid{grid-template-columns:1fr}
+    .ff-grid{grid-template-columns:repeat(2,1fr)}
+    #theme-panel{left:8px;right:8px;width:auto;top:64px}
+    .theme-grid{grid-template-columns:repeat(3,1fr)}
+    .theme-custom-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:420px){
+    .theme-grid{grid-template-columns:repeat(2,1fr)}
+    .p-controls .p-btn:not(.main){width:36px;height:36px;font-size:14px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <i class="fa-solid fa-tower-broadcast hex-logo"></i>
+      <span>HEX- AI RADIO<small>50k+ · free AI · jina · data API · ffmpeg</small></span>
+    </div>
+    <label class="search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="q" type="search" placeholder="Search stations, e.g. “BBC”, “jazz”, “Radio Mirchi”…" autocomplete="off" spellcheck="false" aria-label="Search stations" />
+    </label>
+    <button class="btn icon-btn" id="theme-btn" aria-label="Change theme" title="Change theme">
+      <i class="fa-solid fa-palette"></i>
+    </button>
+    <button class="btn primary" id="surprise" title="Play a random working station">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span class="lbl">Surprise</span>
+    </button>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" data-view="top" aria-selected="true"><i class="fa-solid fa-fire"></i>Top</button>
+    <button class="tab" role="tab" data-view="search" aria-selected="false"><i class="fa-solid fa-magnifying-glass"></i>Search</button>
+    <button class="tab" role="tab" data-view="countries" aria-selected="false"><i class="fa-solid fa-earth-americas"></i>Countries</button>
+    <button class="tab" role="tab" data-view="ai" aria-selected="false"><i class="fa-solid fa-wand-magic-sparkles"></i>AI Discover</button>
+    <button class="tab" role="tab" data-view="data" aria-selected="false"><i class="fa-solid fa-database"></i>Data</button>
+    <button class="tab" role="tab" data-view="favorites" aria-selected="false"><i class="fa-solid fa-heart"></i>Favorites</button>
+    <button class="tab" role="tab" data-view="recent" aria-selected="false"><i class="fa-solid fa-clock-rotate-left"></i>Recent</button>
+  </nav>
+</header>
+
+<!-- THEME PANEL -->
+<div id="theme-panel" hidden role="dialog" aria-label="Theme picker">
+  <div class="theme-panel-head">
+    <span><i class="fa-solid fa-palette"></i>Choose theme</span>
+    <div style="display:flex;gap:4px;align-items:center">
+      <label class="dark-toggle" title="Toggle dark / light preference">
+        <input type="checkbox" id="dark-toggle" aria-label="Dark mode preference" />
+        <i class="fa-solid fa-moon"></i>
+      </label>
+      <button id="theme-close" aria-label="Close theme picker"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+  <div class="theme-grid" id="theme-grid"></div>
+  <details class="theme-custom-section" id="custom-colors-details">
+    <summary><i class="fa-solid fa-sliders" style="margin-right:6px"></i>Custom colors</summary>
+    <div class="theme-custom-grid" id="custom-colors"></div>
+    <div class="theme-custom-actions">
+      <button class="btn" id="custom-reset"><i class="fa-solid fa-rotate-left"></i> Reset to defaults</button>
+    </div>
+  </details>
+</div>
+
+<main>
+  <div id="ai-panel" hidden>
+    <h2><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--acc2)"></i> AI station discovery <span class="chip ai">free · no key · no token</span></h2>
+    <p>Describe a mood, activity, or vibe. Pick a free AI model. If the AI can't answer, a built-in keyword mapper takes over instantly.</p>
+    <div class="ai-row">
+      <input id="ai-prompt" placeholder="e.g. chill jazz for studying, upbeat morning news, rainy day lofi…" />
+      <button class="btn primary" id="ai-go"><i class="fa-solid fa-bolt"></i> Find stations</button>
+    </div>
+    <div class="ai-models" id="ai-models" role="radiogroup" aria-label="AI model"></div>
+    <div class="ai-status" id="ai-status" aria-live="polite">
+      <span class="ai-spinner"></span>
+      <span id="ai-status-text">Pick a model and describe your mood.</span>
+    </div>
+    <div class="ai-progress" id="ai-progress"><div class="ai-progress-inner" id="ai-progress-inner"></div></div>
+  </div>
+
+  <!-- DATA PANEL -->
+  <div id="data-panel" hidden>
+    <div class="data-hero">
+      <h2><i class="fa-solid fa-database" style="color:var(--acc)"></i> Radio Browser API</h2>
+      <p>
+        Full database exposed via a round-robin DNS pool at <code>all.api.radio-browser.info</code>
+        — no API keys, no accounts. Four API contracts indexed on the
+        <a href="https://apis.io/" target="_blank" rel="noopener">APIs.io</a> network:
+        <strong>Stations</strong>, <strong>Categories</strong>, <strong>Interactions</strong> and <strong>Service</strong>.
+      </p>
+    </div>
+    <div id="data-content"></div>
+  </div>
+
+  <details class="filters" id="filters">
+    <summary><i class="fa-solid fa-sliders" style="margin-right:2px"></i> Filters · country · genre · language · codec · bitrate · proxy · HEX-RADIO live sync</summary>
+    <div class="filters-grid">
+      <div class="field"><label for="f-country">Country</label><select id="f-country"><option value="">Any country</option></select></div>
+      <div class="field"><label for="f-tag">Genre / tag</label><select id="f-tag"><option value="">Any genre</option></select></div>
+      <div class="field"><label for="f-lang">Language</label><input id="f-lang" type="text" placeholder="e.g. hindi, english" /></div>
+      <div class="field"><label for="f-codec">Codec</label><select id="f-codec"><option value="">Any</option><option>MP3</option><option>AAC</option><option>AAC+</option><option>OGG</option><option>OPUS</option><option>FLAC</option></select></div>
+      <div class="field"><label for="f-bitrate">Min bitrate</label><select id="f-bitrate"><option value="">Any</option><option value="64">64+</option><option value="96">96+</option><option value="128">128+</option><option value="192">192+</option><option value="256">256+</option></select></div>
+      <div class="field"><label for="f-order">Sort by</label><select id="f-order"><option value="clickcount">Popularity</option><option value="votes">Votes</option><option value="bitrate">Bitrate</option><option value="name">Name</option><option value="random">Random</option></select></div>
+    </div>
+    <div class="filters-actions">
+      <button class="btn" id="load-all" title="Load every station (~50,000) and cache locally"><i class="fa-solid fa-cloud-arrow-down"></i> Load all ~50k stations</button>
+      <button class="btn" id="sync-hexradio" title="Fetch live URLs from hexsleuth.github.io/HEX-RADIO + radio-browser"><i class="fa-solid fa-arrows-rotate"></i> Sync HEX-RADIO live URLs</button>
+      <button class="btn" id="clear-cache" title="Clear IndexedDB station cache"><i class="fa-solid fa-trash-can"></i> Clear local cache</button>
+      <label class="jina-toggle" id="jina-toggle-wrap" title="Route all API calls through r.jina.ai">
+        <input type="checkbox" id="force-jina" />
+        <span><i class="fa-solid fa-satellite-dish" style="margin-right:4px"></i>Force r.jina.ai proxy</span>
+      </label>
+      <span id="proxy-status" class="proxy-status"><i class="fa-solid fa-globe" style="margin-right:4px"></i>Direct</span>
+    </div>
+  </details>
+
+  <div class="section-head">
+    <h2 id="title">Top stations</h2>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div id="grid"></div>
+
+  <!-- LOAD MORE -->
+  <div class="more" id="more-wrap" hidden>
+    <button class="btn" id="more">
+      <span class="btn-spinner" aria-hidden="true"></span>
+      <i class="fa-solid fa-arrow-down"></i>
+      <span id="more-label">Load more</span>
+    </button>
+  </div>
+  <div class="more-loader" id="more-loader" aria-live="polite">
+    <span class="spinner-ring" aria-hidden="true"></span>
+    <span class="more-loader-text" id="more-loader-text">Loading more stations…</span>
+  </div>
+</main>
+
+<footer>
+  <strong>HEX-AI RADIO Browser</strong> ·
+  <a href="https://hexsleuth.github.io/HEX-RADIO/" target="_blank" rel="noopener">HEX-RADIO</a> ·
+  <strong>Data API</strong>: <a href="https://all.api.radio-browser.info" target="_blank" rel="noopener">all.api.radio-browser.info</a> ·
+  <strong>AI</strong>: <a href="https://pollinations.ai/" target="_blank" rel="noopener">Pollinations.ai</a> ·
+  <strong>Proxy</strong>: <a href="https://r.jina.ai/" target="_blank" rel="noopener">r.jina.ai</a> ·
+  <strong>FFmpeg</strong>: <a href="https://ffmpegwasm.netlify.app/" target="_blank" rel="noopener">ffmpeg.wasm</a>
+</footer>
+
+<div id="player" role="region" aria-label="Player">
+  <div class="player-inner">
+    <div class="p-art" id="p-art" title="Click for AI cover art"></div>
+    <div class="p-info">
+      <div class="t" id="p-title">—</div>
+      <div class="s" id="p-sub">Not playing</div>
+    </div>
+    <div class="eq" id="eq"><i></i><i></i><i></i><i></i></div>
+    <div class="p-controls">
+      <div class="vol">
+        <i class="fa-solid fa-volume-high"></i>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
+      </div>
+      <button class="p-btn" id="p-fav" title="Favorite" aria-label="Toggle favorite"><i class="fa-regular fa-heart"></i></button>
+      <button class="p-btn" id="p-dl" title="Export / record" aria-label="Export"><i class="fa-solid fa-download"></i></button>
+      <button class="p-btn main" id="p-play" title="Play / Pause" aria-label="Play or pause"><i class="fa-solid fa-play"></i></button>
+      <button class="p-btn" id="p-close" title="Stop" aria-label="Stop"><i class="fa-solid fa-stop"></i></button>
+    </div>
+  </div>
+</div>
+
+<div id="dl-modal" class="modal" hidden>
+  <div class="modal-box">
+    <h3><i class="fa-solid fa-sliders" style="color:var(--acc2)"></i> Export "<span id="dl-name"></span>"</h3>
+    <p class="subtitle">Powered by FFmpeg.wasm — full <b>libav*</b> stack (libavutil · libavcodec · libavformat · libavdevice · libavfilter · libswscale · libswresample)</p>
+    <div class="lib-banner" id="lib-banner">
+      <span><i class="fa-solid fa-cube"></i> Libraries:</span>
+      <div class="libs" id="lib-tags"></div>
+      <span id="lib-hint" style="margin-left:auto;font-size:11.5px">loads on first encode</span>
+    </div>
+    <div class="ff-grid">
+      <div class="ff-field"><label for="ff-format">Format (libavformat)</label>
+        <select id="ff-format">
+          <option value="mp3">MP3 — libmp3lame</option><option value="m4a">M4A — AAC</option>
+          <option value="ogg">OGG — libvorbis</option><option value="opus">OPUS — libopus</option>
+          <option value="flac">FLAC — lossless</option><option value="wav">WAV — pcm_s16le</option>
+        </select>
+      </div>
+      <div class="ff-field"><label for="ff-bitrate">Bitrate (libavcodec)</label>
+        <select id="ff-bitrate"><option>64</option><option>96</option><option>128</option><option selected>192</option><option>256</option><option>320</option></select>
+      </div>
+      <div class="ff-field"><label for="ff-sr">Sample rate (libswresample)</label>
+        <select id="ff-sr"><option>22050</option><option>32000</option><option selected>44100</option><option>48000</option></select>
+      </div>
+      <div class="ff-field"><label for="ff-ch">Channels (libswresample)</label>
+        <select id="ff-ch"><option value="1">Mono</option><option value="2" selected>Stereo</option></select>
+      </div>
+      <div class="ff-field ff-full"><label for="ff-filter">Audio filter chain (libavfilter)</label>
+        <select id="ff-filter"></select>
+      </div>
+      <div class="ff-field"><label for="ff-duration">Duration (s)</label>
+        <input id="ff-duration" type="number" min="5" max="1800" value="60" />
+      </div>
+      <div class="ff-field"><label for="ff-trim">Skip start (s)</label>
+        <input id="ff-trim" type="number" min="0" max="300" value="0" />
+      </div>
+      <div class="ff-field ff-full">
+        <label class="ff-check"><input type="checkbox" id="ff-art" /><span>Embed AI cover art (MP3/M4A only)</span></label>
+      </div>
+    </div>
+    <div class="ff-progress-wrap" id="ff-progress-wrap" hidden>
+      <div class="ff-progress-bar"><div class="ff-progress-inner" id="ff-progress-inner"></div></div>
+      <div class="ff-progress-text" id="ff-progress-text">0%</div>
+    </div>
+    <div class="dl-status" id="dl-status"></div>
+    <details class="ff-log" id="ff-log-details"><summary>Show FFmpeg log</summary><pre id="ff-log"></pre></details>
+    <div class="modal-actions">
+      <button class="btn" id="dl-cmd" title="Copy the equivalent ffmpeg command"><i class="fa-solid fa-copy"></i> Copy CLI</button>
+      <div class="right">
+        <button class="btn" id="dl-quick" title="Quick WebM record using MediaRecorder"><i class="fa-solid fa-microphone"></i> Quick record</button>
+        <button class="btn" id="dl-close"><i class="fa-solid fa-xmark"></i> Close</button>
+        <button class="btn primary" id="dl-encode"><i class="fa-solid fa-bolt"></i> Encode &amp; download</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<audio id="audio" preload="none"></audio>
+<noscript><p style="padding:24px;text-align:center">This app needs JavaScript enabled.</p></noscript>
+
+<script>
+(() => {
+"use strict";
+
+/* ==================================================================
+   THEME SYSTEM — 33 named themes + custom color palette + dark mode
+   ================================================================== */
+const THEMES = {
+  hex:          { p:'#38e0b0', s:'#2bbf96', a:'#7c6cff', n:'#141b2a', b1:'#0b0f16', b2:'#141b2a', b3:'#232d42', bc:'#e8edf7', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  corporate:    { p:'#4b6bfb', s:'#7b92b2', a:'#67cba0', n:'#181a2a', b1:'#ffffff', b2:'#f7f7f8', b3:'#ebebf0', bc:'#181a2a', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  cupcake:      { p:'#65c3c8', s:'#ef9fbc', a:'#eeaf3a', n:'#291334', b1:'#faf7f5', b2:'#efeae6', b3:'#e7e2df', bc:'#291334', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  bumblebee:    { p:'#e0a82e', s:'#f9d72f', a:'#181830', n:'#181830', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#181830', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  emerald:      { p:'#66cc8a', s:'#377cfb', a:'#ea5234', n:'#333c4d', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#333c4d', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  synthwave:    { p:'#e779c1', s:'#58c7f3', a:'#f3cc30', n:'#20134e', b1:'#2d1b69', b2:'#231549', b3:'#1d1043', bc:'#f9f7fd', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  retro:        { p:'#ef9995', s:'#a4cbb4', a:'#ebdc99', n:'#7d7259', b1:'#e4d8b4', b2:'#d7cba5', b3:'#ccc09d', bc:'#7d7259', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  cyberpunk:    { p:'#ff7598', s:'#75d1f0', a:'#c07eec', n:'#423f00', b1:'#ffee00', b2:'#ffe600', b3:'#f5dc00', bc:'#423f00', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  valentine:    { p:'#e96d7b', s:'#a991f7', a:'#88dbdd', n:'#af4670', b1:'#fef6f8', b2:'#fceced', b3:'#f9e0e2', bc:'#632c3b', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  halloween:    { p:'#f28c18', s:'#6d3a9c', a:'#51a800', n:'#1b1d1d', b1:'#212121', b2:'#1b1d1d', b3:'#161818', bc:'#f3f4f6', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  garden:       { p:'#5c7f67', s:'#ecf4e7', a:'#fae5e5', n:'#5d5656', b1:'#e9e7e7', b2:'#e2e0e0', b3:'#dad8d8', bc:'#5d5656', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  forest:       { p:'#1eb854', s:'#1fd65f', a:'#d99330', n:'#110e0e', b1:'#171212', b2:'#1d1717', b3:'#221b1b', bc:'#e0dede', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  aqua:         { p:'#09ecf3', s:'#966fb3', a:'#ffe999', n:'#3b8ea5', b1:'#345da7', b2:'#2e4f93', b3:'#2a4789', bc:'#d9e6f5', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  lofi:         { p:'#0d0d0d', s:'#1a1919', a:'#262626', n:'#000000', b1:'#ffffff', b2:'#f2f2f2', b3:'#e6e6e6', bc:'#000000', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  pastel:       { p:'#d1c1d7', s:'#f6cbd1', a:'#b4e9d6', n:'#70acc7', b1:'#ffffff', b2:'#f2f2f2', b3:'#e6e6e6', bc:'#000000', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  fantasy:      { p:'#6e0b75', s:'#007ebd', a:'#f8860d', n:'#1f2937', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#1f2937', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  wireframe:    { p:'#b8b8b8', s:'#b8b8b8', a:'#b8b8b8', n:'#ebebeb', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#000000', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  black:        { p:'#333333', s:'#333333', a:'#333333', n:'#141414', b1:'#000000', b2:'#1a1a1a', b3:'#262626', bc:'#cccccc', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  luxury:       { p:'#ffffff', s:'#152747', a:'#513448', n:'#331800', b1:'#09090b', b2:'#171618', b3:'#262527', bc:'#ffffff', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  dracula:      { p:'#ff79c6', s:'#bd93f9', a:'#ffb86c', n:'#414558', b1:'#282a36', b2:'#21222c', b3:'#44475a', bc:'#f8f8f2', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  cmyk:         { p:'#45aeee', s:'#e8488a', a:'#fff232', n:'#1a1a1a', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#000000', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  autumn:       { p:'#8c0327', s:'#d85251', a:'#d59b6a', n:'#826a5c', b1:'#f1f1f1', b2:'#e8e8e8', b3:'#dedede', bc:'#333333', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  business:     { p:'#1c4e80', s:'#7c909a', a:'#ea6947', n:'#23282e', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#23282e', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  acid:         { p:'#ff00ff', s:'#ff7f00', a:'#c4ff00', n:'#150f82', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#150f82', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  lemonade:     { p:'#519903', s:'#e9e92e', a:'#f7f9ca', n:'#191a3f', b1:'#ffffff', b2:'#f9f9f9', b3:'#f3f3f3', bc:'#191a3f', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  night:        { p:'#38bdf8', s:'#818cf8', a:'#f472b6', n:'#1e293b', b1:'#0f172a', b2:'#131c31', b3:'#182337', bc:'#e5e7eb', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  coffee:       { p:'#db924b', s:'#263e3f', a:'#10576d', n:'#120c12', b1:'#20161f', b2:'#2a1d29', b3:'#352637', bc:'#e5ded8', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  winter:       { p:'#047aff', s:'#463aa2', a:'#c148ac', n:'#021431', b1:'#ffffff', b2:'#f1f5f9', b3:'#e2e8f0', bc:'#021431', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  dim:          { p:'#9ca3af', s:'#6b7280', a:'#4b5563', n:'#374151', b1:'#1f2937', b2:'#19202e', b3:'#141b27', bc:'#d1d5db', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  nord:         { p:'#5e81ac', s:'#81a1c1', a:'#88c0d0', n:'#4c566a', b1:'#2e3440', b2:'#3b4252', b3:'#434c5e', bc:'#d8dee9', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  sunset:       { p:'#ff865b', s:'#fd6f9c', a:'#b387fa', n:'#1b1626', b1:'#1b1626', b2:'#221c30', b3:'#2a2338', bc:'#f2eef7', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  caramellatte: { p:'#d18f50', s:'#8e6844', a:'#b25828', n:'#3b2c23', b1:'#f7f0e4', b2:'#efe3ce', b3:'#e6d7bd', bc:'#3b2c23', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+  abyss:        { p:'#0077b6', s:'#00b4d8', a:'#90e0ef', n:'#03045e', b1:'#070f1c', b2:'#0e1729', b3:'#152036', bc:'#c9e0f0', er:'#ff5d6c', wa:'#ffb454', su:'#38e0b0' },
+  silk:         { p:'#ffc2d4', s:'#ffb5a7', a:'#fcd5ce', n:'#e8e8e4', b1:'#ffffff', b2:'#fdf5f5', b3:'#fae9e9', bc:'#3b2c23', er:'#ef4444', wa:'#f59e0b', su:'#10b981' },
+};
+const THEME_NAMES = Object.keys(THEMES);
+const THEME_KEY = 'hex-radio-theme';
+const CUSTOM_COLORS_KEY = 'hex-custom-colors';
+const DARK_MODE_KEY = 'hex-dark-mode';
+
+const CUSTOM_COLOR_SCHEMA = [
+  { key: '--p',  label: 'Primary',      def: '#38e0b0' },
+  { key: '--s',  label: 'Secondary',    def: '#2bbf96' },
+  { key: '--a',  label: 'Accent',       def: '#7c6cff' },
+  { key: '--n',  label: 'Neutral',      def: '#141b2a' },
+  { key: '--b1', label: 'Base 100',     def: '#0b0f16' },
+  { key: '--b2', label: 'Base 200',     def: '#141b2a' },
+  { key: '--b3', label: 'Base 300',     def: '#232d42' },
+  { key: '--bc', label: 'Base Content', def: '#e8edf7' },
+  { key: '--er', label: 'Error',        def: '#ff5d6c' },
+  { key: '--wa', label: 'Warning',      def: '#ffb454' },
+  { key: '--su', label: 'Success',      def: '#38e0b0' },
+];
+
+function getCustomColors() {
+  try {
+    const s = localStorage.getItem(CUSTOM_COLORS_KEY);
+    if (s) {
+      const o = JSON.parse(s);
+      if (o && typeof o === 'object' && Object.keys(o).length > 0) return o;
+    }
+  } catch {}
+  return null;
+}
+function defaultCustomColors() {
+  const o = {};
+  CUSTOM_COLOR_SCHEMA.forEach(c => o[c.key] = c.def);
+  return o;
+}
+function setActiveThemeCard(name) {
+  document.querySelectorAll('.theme-card').forEach(c =>
+    c.classList.toggle('active', c.dataset.theme === name));
+}
+function updateCustomSwatch(colors) {
+  const card = document.querySelector('.theme-card[data-theme="custom"]');
+  if (!card) return;
+  const strip = card.querySelector('.swatch-strip');
+  if (!strip) return;
+  const c = colors || defaultCustomColors();
+  strip.innerHTML = '';
+  ['--p', '--s', '--a', '--b2'].forEach(k => {
+    const s = document.createElement('span');
+    s.style.background = c[k] || '#888';
+    strip.appendChild(s);
+  });
+}
+function syncCustomInputs(colors) {
+  const c = colors || {};
+  CUSTOM_COLOR_SCHEMA.forEach(({ key, def }) => {
+    const inp = document.getElementById('cc-' + key.replace('--', ''));
+    if (inp) inp.value = c[key] || def;
+  });
+}
+function applyCustomColors(colors, { persist = true } = {}) {
+  if (!colors || typeof colors !== 'object') return;
+  const root = document.documentElement;
+  const applied = {};
+  CUSTOM_COLOR_SCHEMA.forEach(({ key, def }) => {
+    const val = colors[key] || def;
+    root.style.setProperty(key, val);
+    applied[key] = val;
+  });
+  root.setAttribute('data-theme', 'custom');
+  if (persist) {
+    try { localStorage.setItem(CUSTOM_COLORS_KEY, JSON.stringify(applied)); } catch {}
+    try { localStorage.setItem(THEME_KEY, 'custom'); } catch {}
+  }
+  setActiveThemeCard('custom');
+  updateCustomSwatch(applied);
+  syncCustomInputs(applied);
+}
+function applyTheme(name) {
+  if (name === 'custom') {
+    applyCustomColors(getCustomColors() || defaultCustomColors());
+    return;
+  }
+  if (!THEMES[name]) name = 'hex';
+  const t = THEMES[name];
+  const root = document.documentElement;
+  root.setAttribute('data-theme', name);
+  Object.entries({
+    '--p': t.p, '--s': t.s, '--a': t.a, '--n': t.n,
+    '--b1': t.b1, '--b2': t.b2, '--b3': t.b3, '--bc': t.bc,
+    '--er': t.er, '--wa': t.wa, '--su': t.su,
+  }).forEach(([k, v]) => root.style.setProperty(k, v));
+  try { localStorage.setItem(THEME_KEY, name); } catch {}
+  setActiveThemeCard(name);
+}
+const applySystemTheme = applyTheme;
+
+function isDarkMode() {
+  try {
+    const s = localStorage.getItem(DARK_MODE_KEY);
+    if (s !== null) return s === 'true';
+  } catch {}
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function applyDarkMode(isDark) {
+  try { localStorage.setItem(DARK_MODE_KEY, String(isDark)); } catch {}
+  document.documentElement.setAttribute('data-dark', String(isDark));
+  const toggle = document.getElementById('dark-toggle');
+  if (toggle) toggle.checked = isDark;
+}
+function loadSettings() {
+  applyDarkMode(isDarkMode());
+}
+function loadSavedTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch {}
+  if (saved === 'custom') {
+    const custom = getCustomColors();
+    if (custom) { applyCustomColors(custom, { persist: false }); return; }
+  }
+  if (saved && THEMES[saved]) { applyTheme(saved); return; }
+  applyTheme(isDarkMode() ? 'hex' : 'corporate');
+}
+function buildThemeGallery() {
+  const grid = document.getElementById('theme-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  THEME_NAMES.forEach(name => {
+    const t = THEMES[name];
+    const card = document.createElement('button');
+    card.className = 'theme-card';
+    card.dataset.theme = name;
+    const strip = document.createElement('div');
+    strip.className = 'swatch-strip';
+    [t.p, t.s, t.a, t.b2].forEach(c => {
+      const s = document.createElement('span'); s.style.background = c; strip.appendChild(s);
+    });
+    card.appendChild(strip);
+    const label = document.createElement('span');
+    label.className = 'theme-label';
+    label.textContent = name;
+    card.appendChild(label);
+    card.addEventListener('click', () => {
+      applyTheme(name);
+      toast(`🎨 Theme: ${name}`);
+    });
+    grid.appendChild(card);
+  });
+  const customCard = document.createElement('button');
+  customCard.className = 'theme-card';
+  customCard.dataset.theme = 'custom';
+  const cStrip = document.createElement('div');
+  cStrip.className = 'swatch-strip';
+  customCard.appendChild(cStrip);
+  const cLabel = document.createElement('span');
+  cLabel.className = 'theme-label';
+  cLabel.textContent = 'custom';
+  customCard.appendChild(cLabel);
+  customCard.addEventListener('click', () => {
+    applyCustomColors(getCustomColors() || defaultCustomColors());
+    const details = document.getElementById('custom-colors-details');
+    if (details && !details.open) details.open = true;
+    const picker = document.getElementById('custom-colors');
+    if (picker) setTimeout(() => picker.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    toast('🎨 Custom theme active — tune the palette below');
+  });
+  grid.appendChild(customCard);
+  updateCustomSwatch(getCustomColors() || defaultCustomColors());
+  const current = document.documentElement.getAttribute('data-theme') || 'hex';
+  setActiveThemeCard(current === 'custom' && !getCustomColors() ? 'hex' : current);
+}
+function buildCustomColorInputs() {
+  const wrap = document.getElementById('custom-colors');
+  if (!wrap) return;
+  const saved = getCustomColors() || defaultCustomColors();
+  wrap.innerHTML = CUSTOM_COLOR_SCHEMA.map(({ key, label }) => `
+    <label class="cc-field">
+      <span>${label}</span>
+      <input type="color" id="cc-${key.replace('--','')}" data-cc-key="${key}" value="${saved[key] || '#000000'}" />
+    </label>
+  `).join('');
+  wrap.querySelectorAll('input[type="color"]').forEach(input => {
+    input.addEventListener('input', () => {
+      const colors = {};
+      wrap.querySelectorAll('input[type="color"]').forEach(inp => {
+        colors[inp.dataset.ccKey] = inp.value;
+      });
+      applyCustomColors(colors);
+    });
+  });
+}
+function openThemePanel() {
+  const p = document.getElementById('theme-panel');
+  if (!p) return;
+  buildThemeGallery();
+  buildCustomColorInputs();
+  syncCustomInputs(getCustomColors() || defaultCustomColors());
+  updateCustomSwatch(getCustomColors() || defaultCustomColors());
+  const current = document.documentElement.getAttribute('data-theme') || 'hex';
+  setActiveThemeCard(current);
+  p.hidden = false;
+}
+function closeThemePanel() {
+  const p = document.getElementById('theme-panel');
+  if (p) p.hidden = true;
+}
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const p = document.getElementById('theme-panel');
+  if (!p) return;
+  if (p.hidden) openThemePanel(); else closeThemePanel();
+});
+document.getElementById('theme-close').addEventListener('click', closeThemePanel);
+document.addEventListener('click', (e) => {
+  const p = document.getElementById('theme-panel');
+  if (!p || p.hidden) return;
+  if (p.contains(e.target) || document.getElementById('theme-btn').contains(e.target)) return;
+  closeThemePanel();
+});
+function bindDarkToggle() {
+  const toggle = document.getElementById('dark-toggle');
+  if (!toggle) return;
+  toggle.addEventListener('change', (e) => {
+    const dark = e.target.checked;
+    applyDarkMode(dark);
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch {}
+    if (saved === 'custom') {
+      toast('Dark-mode preference saved. Custom theme overrides it.', 3200);
+      return;
+    }
+    applyTheme(dark ? 'hex' : 'corporate');
+    toast(dark ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+  });
+}
+function bindCustomReset() {
+  const btn = document.getElementById('custom-reset');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    try { localStorage.removeItem(CUSTOM_COLORS_KEY); } catch {}
+    applyCustomColors(defaultCustomColors());
+    toast('🎨 Custom palette reset to defaults');
+  });
+}
+
+/* ======================= constants ======================= */
+const MIRRORS = [
+  "https://all.api.radio-browser.info",
+  "https://de1.api.radio-browser.info",
+  "https://nl1.api.radio-browser.info",
+  "https://at1.api.radio-browser.info",
+  "https://fi1.api.radio-browser.info"
+];
+let BASE = MIRRORS[0];
+const POLLI_TEXT = "https://text.pollinations.ai";
+const POLLI_IMG  = "https://image.pollinations.ai/prompt";
+const JINA_BASE = "https://r.jina.ai/";
+const JINA_RATE_LIMIT = 17;
+const JINA_WINDOW     = 60000;
+const JINA_MIN_GAP    = 3500;
+
+const RB_API_INFO = {
+  name: "Radio Browser",
+  home: "https://www.radio-browser.info/",
+  docs: "https://api.radio-browser.info/",
+  apisIo: "https://apis.io/",
+  apiRoot: "https://all.api.radio-browser.info",
+  dnsPool: "all.api.radio-browser.info",
+  auth: "None — no API keys, no accounts, no tokens",
+  formats: "JSON (XML, CSV, M3U also available)",
+  contracts: [
+    {
+      id: "stations",
+      name: "Stations API",
+      desc: "Search, browse, and resolve ~50,000 live radio stations.",
+      endpoints: [
+        "/json/stations/search",
+        "/json/stations/topclick/{n}",
+        "/json/stations/byuuid/{uuid}",
+        "/json/stations/bycountrycodeexact/{cc}",
+      ],
+    },
+    {
+      id: "categories",
+      name: "Categories API",
+      desc: "Countries, tags, languages, and codecs used across the directory.",
+      endpoints: [
+        "/json/countries",
+        "/json/tags",
+        "/json/languages",
+        "/json/codecs",
+      ],
+    },
+    {
+      id: "interactions",
+      name: "Interactions API",
+      desc: "Click and vote telemetry used to rank popular stations.",
+      endpoints: [
+        "/json/url/{uuid}",
+        "/json/click/{uuid}",
+        "/json/vote/{uuid}",
+        "/json/votes/{uuid}",
+      ],
+    },
+    {
+      id: "service",
+      name: "Service API",
+      desc: "Mirror discovery, stats, and health for the round-robin pool.",
+      endpoints: [
+        "/json/servers",
+        "/json/stats",
+        "/json/config",
+      ],
+    },
+  ],
+  tags: ["Music", "Radio", "Streaming", "Open Source", "Open Data"],
+};
+
+const FFMPEG_CDN = {
+  ffmpeg: "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js",
+  util:   "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js",
+  core:   "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd",
+};
+const FFMPEG_LIBS = ["libavutil","libavcodec","libavformat","libavdevice","libavfilter","libswscale","libswresample"];
+const ENCODERS = {
+  mp3:{codec:"libmp3lame",ext:"mp3",mime:"audio/mpeg",lossy:true,fmt:"mp3"},
+  m4a:{codec:"aac",ext:"m4a",mime:"audio/mp4",lossy:true,fmt:"ipod"},
+  ogg:{codec:"libvorbis",ext:"ogg",mime:"audio/ogg",lossy:true,fmt:"ogg"},
+  opus:{codec:"libopus",ext:"opus",mime:"audio/opus",lossy:true,fmt:"opus"},
+  flac:{codec:"flac",ext:"flac",mime:"audio/flac",lossy:false,fmt:"flac"},
+  wav:{codec:"pcm_s16le",ext:"wav",mime:"audio/wav",lossy:false,fmt:"wav"},
+};
+const FILTER_PRESETS = {
+  none:{label:"None (original audio)",chain:""},
+  loudnorm:{label:"Loudness normalize (EBU R128)",chain:"loudnorm=I=-16:TP=-1.5:LRA=11"},
+  dynaudnorm:{label:"Dynamic normalizer",chain:"dynaudnorm=f=150:g=15"},
+  denoise:{label:"Noise reduction (afftdn)",chain:"afftdn=nf=-25"},
+  "gentle-eq":{label:"Gentle EQ (warm tone)",chain:"equalizer=f=100:t=q:w=1:g=2,equalizer=f=3000:t=q:w=1:g=1"},
+  voice:{label:"Voice clarity (podcast)",chain:"highpass=f=80,lowpass=f=12000,dynaudnorm"},
+  "bass-boost":{label:"Bass boost",chain:"equalizer=f=80:t=q:w=2:g=6"},
+  "stereo-wide":{label:"Stereo widen (stereotools)",chain:"stereotools=mlev=1.5"},
+};
+const LS = { fav:"hex.favorites.v1", recent:"hex.recent.v1", vol:"hex.volume.v1", art:"hex.aiart.v1", model:"hex.aimodel.v1", forceJina:"hex.forcejina.v1", live:"hex.liveurls.v1", countries:"hex.countries.v1" };
+const PAGE = 60;
+const MAX_RECENT = 40;
+const API_MAX = 50000;
+const FF_OPTS_LS = "hex.ffopts.v1";
+const HEX_RADIO_URL = "https://hexsleuth.github.io/HEX-RADIO/";
+
+const AI_MODELS = [
+  { id:"openai", label:"GPT-4o mini", provider:"OpenAI" },
+  { id:"openai-large", label:"GPT-4o", provider:"OpenAI" },
+  { id:"mistral", label:"Mistral Small", provider:"Mistral" },
+  { id:"llama", label:"Llama 3.1 70B", provider:"Meta" },
+  { id:"deepseek", label:"DeepSeek V3", provider:"DeepSeek" },
+  { id:"deepseek-r1", label:"DeepSeek R1", provider:"DeepSeek" },
+  { id:"qwen-coder", label:"Qwen Coder", provider:"Alibaba" },
+  { id:"gemini", label:"Gemini Flash", provider:"Google" },
+  { id:"searchgpt", label:"SearchGPT", provider:"OpenAI+web" },
+  { id:"evil", label:"Unfiltered", provider:"Community" },
+];
+const FALLBACK_CHAIN = ["openai","mistral","llama","deepseek"];
+
+/* ======================= helpers ======================= */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const isHttpsBlocked = (url) => location.protocol === "https:" && /^http:\/\//i.test(url || "");
+function logoUrl(u) {
+  if (!u) return "";
+  if (location.protocol === "https:" && /^http:\/\//i.test(u)) {
+    return "https://images.weserv.nl/?url=" + encodeURIComponent(u.replace(/^https?:\/\//i,"")) + "&w=104&h=104&fit=cover";
+  }
+  return u;
+}
+function streamUrl(s) { return s.url_resolved || s.url || ""; }
+function sanitizeName(n){ return String(n||"station").replace(/[^\w\-]+/g,"_").slice(0,60) || "station"; }
+
+let toastTimer;
+function toast(msg, ms = 3600) {
+  const t = $("#toast"); if (!t) return;
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), ms);
+}
+function download(blob, filename) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+}
+const loadLS = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const saveLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement("script");
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+function countryFlagEmoji(code) {
+  if (!code || code.length !== 2) return "🌐";
+  return code.toUpperCase().replace(/./g, c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65));
+}
+
+/* ======================= state ======================= */
+const state = {
+  view:"top", query:"", tag:"", country:"", language:"", codec:"", minBitrate:"",
+  order:"clickcount", offset:0, items:[],
+  favorites: loadLS(LS.fav, []),
+  recent: loadLS(LS.recent, []),
+  current:null, loading:false,
+  aiModel: loadLS(LS.model, "openai"),
+  forceJina: loadLS(LS.forceJina, false),
+  lastVia:"direct",
+  _jinaToastShown:0,
+};
+const byId = new Map();
+let aiArt = loadLS(LS.art, {});
+let liveUrlOverrides = loadLS(LS.live, {});
+let cachedCountries = loadLS(LS.countries, []);
+const renderedIds = new Set();
+/* Guard so loadMore can't run twice concurrently */
+let loadMoreInFlight = false;
+
+/* ======================= IndexedDB ======================= */
+let dbPromise;
+function openDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open("HexRadioDB", 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("stations")) db.createObjectStore("stations", { keyPath: "stationuuid" });
+      if (!db.objectStoreNames.contains("meta")) db.createObjectStore("meta");
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+async function cacheStations(stations) {
+  try {
+    const db = await openDB();
+    const tx = db.transaction("stations", "readwrite");
+    const store = tx.objectStore("stations");
+    for (const s of stations) store.put(s);
+    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+    const tx2 = db.transaction("meta", "readwrite");
+    tx2.objectStore("meta").put(stations.length, "count");
+    tx2.objectStore("meta").put(Date.now(), "updated");
+    await new Promise((res, rej) => { tx2.oncomplete = res; tx2.onerror = rej; });
+  } catch (e) { console.warn("cacheStations", e); }
+}
+async function getCachedCount() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction("meta","readonly");
+    return await new Promise((res, rej) => {
+      const r = tx.objectStore("meta").get("count");
+      r.onsuccess = () => res(r.result || 0); r.onerror = () => rej(r.error);
+    });
+  } catch { return 0; }
+}
+async function clearCache() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(["stations","meta"], "readwrite");
+    tx.objectStore("stations").clear(); tx.objectStore("meta").clear();
+    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+    toast("Local cache cleared");
+  } catch { toast("Could not clear cache"); }
+}
+
+/* ======================= jina proxy ======================= */
+let jinaCalls = 0, jinaWindowStart = Date.now(), lastJinaCall = 0;
+async function jinaThrottle() {
+  const now = Date.now();
+  if (now - jinaWindowStart > JINA_WINDOW) { jinaCalls = 0; jinaWindowStart = now; }
+  if (jinaCalls >= JINA_RATE_LIMIT) {
+    await new Promise(r => setTimeout(r, JINA_WINDOW - (now - jinaWindowStart) + 500));
+    jinaCalls = 0; jinaWindowStart = Date.now();
+  }
+  const gap = now - lastJinaCall;
+  if (gap < JINA_MIN_GAP) await new Promise(r => setTimeout(r, JINA_MIN_GAP - gap));
+  jinaCalls++; lastJinaCall = Date.now();
+}
+async function jinaFetch(targetUrl, { timeout = 30000, signal, retries = 1 } = {}) {
+  await jinaThrottle();
+  const proxied = `${JINA_BASE}${targetUrl}`;
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeout);
+    try {
+      const res = await fetch(proxied, { signal: signal || ctl.signal });
+      if (res.status === 429 && attempt < retries) { await new Promise(r => setTimeout(r, 5000)); continue; }
+      if (!res.ok) throw new Error("Jina HTTP " + res.status);
+      return await res.text();
+    } catch (e) {
+      lastErr = e;
+      if (e.name === "AbortError" || attempt >= retries) throw e;
+      await new Promise(r => setTimeout(r, 2000));
+    } finally { clearTimeout(timer); }
+  }
+  throw lastErr || new Error("Jina fetch failed");
+}
+function extractJSON(text) {
+  if (!text || typeof text !== "string") return null;
+  let s = text.trim();
+  const fence = s.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/i);
+  if (fence) s = fence[1].trim();
+  try { return JSON.parse(s); } catch {}
+  const startB = s.search(/[\[{]/);
+  if (startB < 0) return null;
+  for (const endCh of ["]","}"]) {
+    const endB = s.lastIndexOf(endCh);
+    if (endB > startB) { try { return JSON.parse(s.slice(startB, endB + 1)); } catch {} }
+  }
+  return null;
+}
+async function apiJina(path, params = {}, signal) {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== "" && v !== null && v !== undefined) qs.set(k, String(v));
+  }
+  const target = `${BASE}${path}${qs.toString() ? "?" + qs : ""}`;
+  const text = await jinaFetch(target, { signal });
+  const json = extractJSON(text);
+  if (json === null) throw new Error("Jina: non-JSON response");
+  return json;
+}
+
+/* ======================= radio-browser API ======================= */
+let abortCtl = null;
+function mirrorOrder() { return [BASE, ...MIRRORS.filter(m => m !== BASE)]; }
+async function api(path, params = {}, signal) {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== "" && v !== null && v !== undefined) qs.set(k, String(v));
+  }
+  const url = `${BASE}${path}${qs.toString() ? "?" + qs : ""}`;
+  const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`HTTP ${res.status} from ${BASE}`);
+  return res.json();
+}
+async function apiRetry(path, params = {}, signal) {
+  let lastErr;
+  if (!state.forceJina) {
+    for (const base of mirrorOrder()) {
+      try {
+        BASE = base;
+        const data = await api(path, params, signal);
+        state.lastVia = "direct"; updateProxyStatus();
+        return data;
+      } catch (e) { if (e && e.name === "AbortError") throw e; lastErr = e; }
+    }
+  }
+  try {
+    if (!state._jinaToastShown || Date.now() - state._jinaToastShown > 300000) {
+      state._jinaToastShown = Date.now();
+      toast(state.forceJina ? "🛰️ Routing via r.jina.ai (forced)" : "🛰️ Mirrors blocked — routing via r.jina.ai", 3500);
+    }
+    const data = await apiJina(path, params, signal);
+    state.lastVia = "jina"; updateProxyStatus();
+    return data;
+  } catch (e) { if (e && e.name === "AbortError") throw e; lastErr = e; }
+  updateProxyStatus(true);
+  throw lastErr || new Error("All mirrors + Jina failed");
+}
+function updateProxyStatus(isError = false) {
+  const el = $("#proxy-status"); if (!el) return;
+  el.classList.remove("jina", "err");
+  if (isError) { el.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="margin-right:4px"></i>Offline'; el.classList.add("err"); }
+  else if (state.forceJina) { el.innerHTML = '<i class="fa-solid fa-satellite-dish" style="margin-right:4px"></i>jina (forced)'; el.classList.add("jina"); }
+  else if (state.lastVia === "jina") { el.innerHTML = '<i class="fa-solid fa-satellite-dish" style="margin-right:4px"></i>jina'; el.classList.add("jina"); }
+  else { el.innerHTML = '<i class="fa-solid fa-globe" style="margin-right:4px"></i>Direct'; }
+}
+(async function discoverMirror() {
+  const url = "https://all.api.radio-browser.info/json/servers";
+  let servers = null;
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 4000);
+    try {
+      const res = await fetch(url, { signal: ctl.signal });
+      if (res.ok) servers = await res.json();
+    } catch {} finally { clearTimeout(timer); }
+  } catch {}
+  if (!servers) { try { servers = extractJSON(await jinaFetch(url, { timeout: 12000, retries: 0 })); } catch {} }
+  if (!Array.isArray(servers)) return;
+  const list = servers
+    .map(s => "https://" + String(s.name || "").replace(/^https?:\/\//,""))
+    .filter(u => /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(u));
+  if (list.length) {
+    list.forEach(u => { if (!MIRRORS.includes(u)) MIRRORS.push(u); });
+  }
+})();
+
+/* ==================================================================
+   HEX-RADIO LIVE URL SYNC
+   ================================================================== */
+function parseHexRadioContent(text) {
+  const out = [];
+  if (!text || typeof text !== "string") return out;
+  try {
+    const json = JSON.parse(text.trim());
+    if (Array.isArray(json)) return json;
+    if (json && Array.isArray(json.stations)) return json.stations;
+    if (json && Array.isArray(json.data)) return json.data;
+  } catch {}
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) {
+    try {
+      const json = JSON.parse(fence[1].trim());
+      if (Array.isArray(json)) return json;
+      if (json && Array.isArray(json.stations)) return json.stations;
+    } catch {}
+  }
+  const linkRe = /\[([^\]]{1,200})\]\((https?:\/\/[^\s)]+)\)/g;
+  let m;
+  while ((m = linkRe.exec(text)) !== null) {
+    const [, name, url] = m;
+    if (/\.(mp3|m3u8|aac|ogg|opus|flac)(\?|$)/i.test(url) || /stream|radio|live/i.test(url)) {
+      out.push({ name, url, url_resolved: url });
+    }
+  }
+  const hrefRe = /href=["'](https?:\/\/[^"']+\.(?:mp3|m3u8|aac|ogg|opus|flac)[^"']*)["']/gi;
+  while ((m = hrefRe.exec(text)) !== null) {
+    const url = m[1];
+    if (!out.find(s => s.url === url)) {
+      out.push({ name: url.split('/').pop() || 'Station', url, url_resolved: url });
+    }
+  }
+  const rawRe = /(https?:\/\/[^\s"'<>]+\.(?:mp3|m3u8|aac|ogg|opus|flac)(?:\?[^\s"'<>]*)?)/gi;
+  while ((m = rawRe.exec(text)) !== null) {
+    const url = m[1];
+    if (!out.find(s => s.url === url)) {
+      out.push({ name: url.split('/').pop() || 'Station', url, url_resolved: url });
+    }
+  }
+  return out;
+}
+
+async function fetchHexRadioLiveUrls(setStatus) {
+  const parsed = [];
+  setStatus?.("🛰️ Fetching HEX-RADIO page…");
+  try {
+    const pageUrl = HEX_RADIO_URL;
+    let text = null;
+    try {
+      const res = await fetch(pageUrl);
+      if (res.ok) text = await res.text();
+    } catch {}
+    if (!text) {
+      text = await jinaFetch(pageUrl, { timeout: 20000 });
+    }
+    if (text) {
+      const stations = parseHexRadioContent(text);
+      parsed.push(...stations);
+      console.log(`[HEX-RADIO] parsed ${stations.length} entries from page`);
+    }
+  } catch (e) { console.warn("[HEX-RADIO] page fetch failed:", e.message); }
+
+  setStatus?.("📡 Fetching verified live stations from radio-browser…");
+  try {
+    const working = await apiRetry("/json/stations/search", {
+      limit: 2000, order: "clickcount", reverse: true, hidebroken: true
+    });
+    if (Array.isArray(working)) {
+      working.forEach(s => {
+        if (s.stationuuid && (s.url_resolved || s.url)) {
+          parsed.push({
+            stationuuid: s.stationuuid,
+            url_resolved: s.url_resolved || s.url,
+            url: s.url,
+            name: s.name,
+          });
+        }
+      });
+      console.log(`[radio-browser] fetched ${working.length} live stations`);
+    }
+  } catch (e) { console.warn("[radio-browser] fetch failed:", e.message); }
+
+  let count = 0;
+  for (const s of parsed) {
+    const url = s.url_resolved || s.url;
+    if (!url) continue;
+    if (s.stationuuid) {
+      if (liveUrlOverrides[s.stationuuid] !== url) {
+        liveUrlOverrides[s.stationuuid] = url;
+        count++;
+      }
+    } else if (s.name) {
+      const key = "name:" + s.name.toLowerCase().trim();
+      if (liveUrlOverrides[key] !== url) {
+        liveUrlOverrides[key] = url;
+        count++;
+      }
+    }
+  }
+  if (count > 0) saveLS(LS.live, liveUrlOverrides);
+  return count;
+}
+
+function pickStationUrl(s) {
+  if (s.stationuuid && liveUrlOverrides[s.stationuuid]) {
+    return liveUrlOverrides[s.stationuuid];
+  }
+  const nameKey = "name:" + (s.name || "").toLowerCase().trim();
+  if (liveUrlOverrides[nameKey]) return liveUrlOverrides[nameKey];
+  const a = streamUrl(s);
+  if (a && !isHttpsBlocked(a)) return a;
+  const b = s.url && !isHttpsBlocked(s.url) ? s.url : "";
+  return b || a;
+}
+
+async function syncHexRadioManual() {
+  const btn = $("#sync-hexradio");
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing…';
+  try {
+    const count = await fetchHexRadioLiveUrls((msg) => { btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${msg}`; });
+    if (count > 0) toast(`✅ Synced ${count.toLocaleString()} live URLs from HEX-RADIO + radio-browser`);
+    else toast("⚠️ No new live URLs found");
+  } catch (e) {
+    console.error(e);
+    toast("❌ HEX-RADIO sync failed: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+async function syncHexRadioSilent() {
+  try {
+    const count = await fetchHexRadioLiveUrls();
+    if (count > 0) toast(`🛰️ Auto-synced ${count.toLocaleString()} live URLs from HEX-RADIO`, 3500);
+  } catch (e) { console.warn("Silent HEX-RADIO sync failed", e); }
+}
+
+/* ======================= countries auto-load ======================= */
+async function loadAllCountries(setStatus) {
+  setStatus?.("🌍 Fetching all countries…");
+  let countries = [];
+  try {
+    const data = await apiRetry("/json/countries", {});
+    if (Array.isArray(data)) countries = data;
+  } catch (e) { console.warn("countries fetch failed", e); }
+
+  if (!countries.length && cachedCountries.length) {
+    countries = cachedCountries;
+  }
+
+  if (countries.length) {
+    countries = countries
+      .filter(c => c && c.iso_3166_1 && c.name && (c.stationcount || 0) > 0)
+      .sort((a, b) => (b.stationcount || 0) - (a.stationcount || 0));
+    cachedCountries = countries;
+    saveLS(LS.countries, countries);
+    populateCountryDropdown(countries);
+    return countries.length;
+  }
+  return 0;
+}
+
+function populateCountryDropdown(countries) {
+  const cSel = $("#f-country");
+  if (!cSel) return;
+  const current = cSel.value;
+  cSel.innerHTML = '<option value="">Any country</option>';
+  countries.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.iso_3166_1;
+    o.textContent = `${c.name} (${(c.stationcount || 0).toLocaleString()})`;
+    cSel.appendChild(o);
+  });
+  if (current) cSel.value = current;
+}
+
+/* ======================= free AI ======================= */
+async function aiTextOnce(prompt, model, timeoutMs = 18000) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
+  const seed = 42 + (Date.now() % 1000);
+  try {
+    const res = await fetch(`${POLLI_TEXT}/openai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model, seed, temperature: 0.7, messages: [{ role: "user", content: prompt }] }),
+      signal: ctl.signal,
+    });
+    if (res.ok) {
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
+        const data = await res.json();
+        const txt = data?.choices?.[0]?.message?.content;
+        if (txt && txt.trim()) { clearTimeout(timer); return txt.trim(); }
+      } else {
+        const txt = (await res.text()).trim();
+        if (txt) { clearTimeout(timer); return txt; }
+      }
+    }
+  } catch (e) { if (e.name === "AbortError") { clearTimeout(timer); throw e; } }
+  const url = `${POLLI_TEXT}/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}&seed=${seed}&nologo=true`;
+  const res2 = await fetch(url, { signal: ctl.signal });
+  clearTimeout(timer);
+  if (!res2.ok) throw new Error(`AI HTTP ${res2.status} (${model})`);
+  const txt = (await res2.text()).trim();
+  if (!txt) throw new Error(`Empty AI response (${model})`);
+  return txt;
+}
+async function aiTextWithFallback(prompt, primary, onAttempt) {
+  const chain = [primary, ...FALLBACK_CHAIN.filter(m => m !== primary)];
+  let lastErr;
+  for (let i = 0; i < chain.length; i++) {
+    try {
+      if (onAttempt) onAttempt(chain[i], i + 1, chain.length);
+      return { text: await aiTextOnce(prompt, chain[i]), model: chain[i] };
+    } catch (e) { lastErr = e; if (e.name === "AbortError") throw e; }
+  }
+  throw lastErr || new Error("All AI models failed");
+}
+
+const MOOD_MAP = {
+  chill:["chillout","lounge","ambient"], relax:["ambient","chillout","classical"],
+  study:["lofi","chillout","classical"], work:["lofi","chillout","focus"],
+  party:["dance","house","edm"], dance:["dance","house","techno"],
+  jazz:["jazz","smooth-jazz","bebop"], rock:["rock","classic-rock","alternative"],
+  pop:["pop","top-40","hits"], hiphop:["hiphop","rap","rnb"], rap:["rap","hiphop"],
+  classical:["classical","opera","symphony"], news:["news","talk"],
+  talk:["talk","news"], sport:["sport","talk"], country:["country","americana"],
+  electronic:["electronic","techno","house"], metal:["metal","heavy-metal"],
+  punk:["punk","rock"], folk:["folk","acoustic","americana"], blues:["blues","jazz"],
+  reggae:["reggae","dancehall"], latin:["latin","salsa","reggaeton"],
+  bollywood:["bollywood","hindi","filmi"], hindi:["hindi","bollywood"],
+  tamil:["tamil","kollywood"], morning:["morning","easy-listening"],
+  night:["lounge","chillout","ambient"], rainy:["chillout","ambient","lofi"],
+  sunny:["pop","tropical","summer"], sad:["blues","acoustic","emotional"],
+  happy:["pop","dance","upbeat"], workout:["dance","edm","hiphop"],
+  yoga:["ambient","new-age","chillout"], sleep:["ambient","sleep","relax"],
+  meditation:["meditation","ambient","new-age"], retro:["80s","70s","oldies"],
+  oldies:["oldies","60s","70s"], kpop:["kpop","korean"], anime:["anime","jpop"],
+  gaming:["electronic","edm","game"], cooking:["jazz","acoustic","easy-listening"],
+  coffee:["jazz","acoustic","lounge"], pub:["rock","irish","folk"],
+  church:["gospel","christian","choral"], christmas:["christmas","holiday"],
+  lofi:["lofi","chillhop","chillout"], techno:["techno","electronic","trance"],
+  ambient:["ambient","drone","new-age"], soul:["soul","rnb","funk"],
+  funk:["funk","disco","soul"], disco:["disco","funk","70s"],
+  indie:["indie","alternative","indie-rock"], alternative:["alternative","indie-rock"],
+  punkrock:["punk","punk-rock","hardcore"], trance:["trance","psytrance","electronic"],
+  house:["house","deep-house","tech-house"], edm:["edm","dance","electro"],
+};
+function heuristicTags(mood) {
+  const words = mood.toLowerCase().split(/\s+/).filter(Boolean);
+  const hits = [];
+  for (const w of words) {
+    if (MOOD_MAP[w]) { hits.push(...MOOD_MAP[w]); if (hits.length >= 4) break; }
+    for (const [k, v] of Object.entries(MOOD_MAP)) {
+      if (w.includes(k) || k.includes(w)) { hits.push(...v); break; }
+    }
+    if (hits.length >= 4) break;
+  }
+  if (!hits.length) hits.push(mood.toLowerCase().replace(/\s+/g,"-"), "various", "mixed");
+  return [...new Set(hits)].slice(0, 3);
+}
+
+/* ======================= AI discovery ======================= */
+const AI_PHASES = { IDLE:"idle", THINKING:"thinking", SEARCHING:"searching", DONE:"done", ERROR:"error" };
+function setAIStatus(phase, text, { progress = null } = {}) {
+  const wrap = $("#ai-status");
+  $("#ai-status-text").textContent = text;
+  wrap.classList.remove("ok","err","warn","loading");
+  if (phase === AI_PHASES.THINKING || phase === AI_PHASES.SEARCHING) wrap.classList.add("loading");
+  else if (phase === AI_PHASES.DONE) wrap.classList.add("ok");
+  else if (phase === AI_PHASES.ERROR) wrap.classList.add("err");
+  if (progress !== null) $("#ai-progress-inner").style.width = Math.round(progress * 100) + "%";
+}
+function resetAIStatus() { setAIStatus(AI_PHASES.IDLE, "Pick a model and describe your mood.", { progress: 0 }); }
+function clearGridForAI() { $("#grid").innerHTML = ""; renderedIds.clear(); }
+function appendStations(list) {
+  const fresh = list.filter(s => s && s.stationuuid && !renderedIds.has(s.stationuuid));
+  if (!fresh.length) return 0;
+  fresh.forEach(s => { byId.set(s.stationuuid, s); renderedIds.add(s.stationuuid); });
+  const grid = $("#grid");
+  const empty = grid.querySelector(".empty"); if (empty) empty.remove();
+  grid.insertAdjacentHTML("beforeend", fresh.map(cardHTML).join(""));
+  return fresh.length;
+}
+async function aiDiscover(mood, model) {
+  const goBtn = $("#ai-go"); goBtn.disabled = true;
+  try {
+    setAIStatus(AI_PHASES.THINKING, `🧠 ${model} is analysing your mood…`, { progress: 0.05 });
+    let tags = [], usedAI = false;
+    try {
+      const prompt =
+`You are a music curator picking live radio genres.
+User's mood: "${mood}"
+
+Reply with ONLY 3 genre tags on one line, comma-separated, lowercase, no explanation.
+Tags must be single words or short-hyphenated (e.g. "jazz", "lo-fi", "smooth-jazz", "classic-rock").
+Example output: jazz,chillout,acoustic`;
+      const { text, model: usedModel } = await aiTextWithFallback(prompt, model, (m, i, t) => {
+        setAIStatus(AI_PHASES.THINKING, `🧠 Trying ${m}… (${i}/${t})`, { progress: 0.05 + i * 0.02 });
+      });
+      usedAI = true;
+      tags = text.split(/[,\n]/).map(t => t.trim().toLowerCase()
+        .replace(/^[\-*\d.\s"'`]+/, "").replace(/[^\w\- ]+/g, "").replace(/\s+/g, "-"))
+        .filter(t => t && t.length > 1 && t.length < 40).slice(0, 3);
+      if (usedModel !== model) toast(`Model ${model} failed — used ${usedModel}`, 3000);
+    } catch (e) {
+      setAIStatus(AI_PHASES.SEARCHING, "⚠️ AI unavailable — using built-in keyword mapper…", { progress: 0.15 });
+      tags = heuristicTags(mood);
+      await new Promise(r => setTimeout(r, 300));
+    }
+    if (!tags.length) tags = heuristicTags(mood);
+    setAIStatus(AI_PHASES.SEARCHING, `📡 Searching for ${tags.map(t=>`“${t}”`).join(", ")}…`, { progress: 0.2 });
+    const seen = new Map(); let completed = 0; const perTagResults = {};
+    await Promise.all(tags.map(async (tag) => {
+      try {
+        const list = await apiRetry("/json/stations/search", { tag, limit: 40, hidebroken: true, order: "clickcount", reverse: true });
+        completed++;
+        const fresh = (list || []).filter(s => s.stationuuid);
+        perTagResults[tag] = fresh.length;
+        fresh.forEach(s => { if (!seen.has(s.stationuuid)) seen.set(s.stationuuid, s); });
+        if (state.view === "ai") {
+          const newOnes = fresh.slice(0, 12).filter(s => !renderedIds.has(s.stationuuid));
+          appendStations(newOnes);
+        }
+        setAIStatus(AI_PHASES.SEARCHING, `📡 ${completed}/${tags.length} tags done · ${seen.size} stations…`, { progress: 0.2 + (completed / tags.length) * 0.7 });
+      } catch (err) { completed++; perTagResults[tag] = 0; }
+    }));
+    if (state.items.length > 500) {
+      state.items.forEach(s => {
+        const hay = ((s.name||"") + " " + (s.tags||"")).toLowerCase();
+        if (tags.some(t => hay.includes(t.replace(/-/g," ")) || hay.includes(t))) {
+          if (!seen.has(s.stationuuid)) seen.set(s.stationuuid, s);
+        }
+      });
+    }
+    const results = Array.from(seen.values()).sort((a,b) => (b.clickcount||0) - (a.clickcount||0)).slice(0, 150);
+    const remaining = results.filter(s => !renderedIds.has(s.stationuuid));
+    if (remaining.length) appendStations(remaining);
+    state.items = results; state.offset = 0;
+    $("#title").textContent = `AI picks for “${mood}”`;
+    const tagSummary = tags.map(t => `${t}${perTagResults[t] !== undefined ? ` (${perTagResults[t]})` : ""}`).join(", ");
+    $("#count").textContent = `${results.length} stations · tags: ${tagSummary}`;
+    $("#more-wrap").hidden = true;
+    if (!results.length) {
+      $("#grid").innerHTML = `<div class="empty"><b>No stations found</b>Try a different mood or pick another model.</div>`;
+      setAIStatus(AI_PHASES.ERROR, "No matching stations — try rephrasing.", { progress: 1 });
+    } else {
+      setAIStatus(AI_PHASES.DONE, `✨ ${results.length} stations${usedAI?"":" (offline fallback)"} · tags: ${tags.join(", ")}`, { progress: 1 });
+    }
+  } catch (e) {
+    console.error(e);
+    setAIStatus(AI_PHASES.ERROR, "❌ " + (e.message || "AI discovery failed"), { progress: 1 });
+  } finally { goBtn.disabled = false; }
+}
+
+/* ======================= AI cover art ======================= */
+function updatePlayerArt(s) {
+  const art = aiArt[s.stationuuid] || logoUrl(s.favicon);
+  if (art) {
+    $("#p-art").innerHTML = `<img alt="" src="${esc(art)}" onerror="this.remove()">` +
+      (aiArt[s.stationuuid] ? `<span class="ai-tag">AI</span>` : "");
+  } else {
+    $("#p-art").innerHTML = `<span style="font-weight:800;color:color-mix(in srgb, var(--bc) 45%, transparent)">${esc((s.name||"?").charAt(0).toUpperCase())}</span>`;
+  }
+}
+function aiImageUrl(prompt, seed = 0) {
+  return `${POLLI_IMG}/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${seed}`;
+}
+async function generateAIArt(s) {
+  if (!s) return;
+  toast("🎨 Generating AI cover art…", 1500);
+  const prompt = `Album cover art for live radio "${s.name}". Genres: ${(s.tags||"").split(",").slice(0,3).join(", ")||"varied"}. Country: ${s.country||"unknown"}. Style: modern, vibrant, artistic, abstract, no text.`;
+  const seed = (s.stationuuid||"seed").split("").reduce((h,c)=>((h*31)+c.charCodeAt(0))|0,7);
+  const url = aiImageUrl(prompt, Math.abs(seed) % 999999);
+  aiArt[s.stationuuid] = url;
+  saveLS(LS.art, aiArt);
+  updatePlayerArt(s);
+  toast("✨ AI art ready");
+}
+
+/* ==================================================================
+   DATA VIEW — Radio Browser API reference
+   ================================================================== */
+async function fetchJSONSmart(url, { timeout = 15000 } = {}) {
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeout);
+    try {
+      const res = await fetch(url, { headers: { Accept: "application/json" }, signal: ctl.signal });
+      if (res.ok) return await res.json();
+    } finally { clearTimeout(timer); }
+  } catch {}
+  try {
+    const txt = await jinaFetch(url, { timeout: timeout + 5000, retries: 0 });
+    return extractJSON(txt);
+  } catch { return null; }
+}
+
+function renderContracts() {
+  const grid = $("#contract-grid");
+  if (!grid) return;
+  grid.innerHTML = RB_API_INFO.contracts.map(c => `
+    <article class="contract">
+      <div class="contract-head">
+        <span class="contract-id">${esc(c.id.toUpperCase())}</span>
+        <h4>${esc(c.name)}</h4>
+      </div>
+      <p>${esc(c.desc)}</p>
+      <div class="contract-ep">${
+        c.endpoints.map(e =>
+          `<code data-copy="${esc(RB_API_INFO.apiRoot + e)}" title="Copy full URL">${esc(e)}</code>`
+        ).join("")
+      }</div>
+    </article>
+  `).join("");
+}
+
+function renderEndpoints() {
+  const list = $("#endpoint-list");
+  if (!list) return;
+  const seen = new Set();
+  const rows = [];
+  RB_API_INFO.contracts.forEach(c => c.endpoints.forEach(e => {
+    if (seen.has(e)) return;
+    seen.add(e);
+    rows.push(
+      `<button class="ep-row" data-copy="${esc(RB_API_INFO.apiRoot + e)}" title="Copy full URL">
+        <code>${esc(e)}</code><i class="fa-regular fa-copy"></i>
+      </button>`
+    );
+  }));
+  list.innerHTML = rows.join("");
+}
+
+function renderDataShell() {
+  const wrap = $("#data-content");
+  if (!wrap) return;
+  const info = RB_API_INFO;
+  wrap.innerHTML = `
+    <div class="data-grid">
+      <section class="data-card">
+        <h3><i class="fa-solid fa-key" style="color:var(--acc)"></i> Access model</h3>
+        <p>${esc(info.auth)}. Responses are <b>${esc(info.formats)}</b>.</p>
+        <div class="data-kv">
+          <div><span>API root</span><code>${esc(info.apiRoot)}</code></div>
+          <div><span>Round-robin DNS pool</span><code>${esc(info.dnsPool)}</code></div>
+          <div><span>Indexed on</span><a href="${esc(info.apisIo)}" target="_blank" rel="noopener">apis.io</a></div>
+          <div><span>Homepage</span><a href="${esc(info.home)}" target="_blank" rel="noopener">radio-browser.info</a></div>
+          <div><span>Docs</span><a href="${esc(info.docs)}" target="_blank" rel="noopener">api.radio-browser.info</a></div>
+        </div>
+      </section>
+      <section class="data-card">
+        <h3><i class="fa-solid fa-heart-pulse" style="color:var(--acc)"></i> Service status</h3>
+        <div id="data-status">checking…</div>
+      </section>
+      <section class="data-card">
+        <h3><i class="fa-solid fa-chart-simple" style="color:var(--acc)"></i> Directory stats</h3>
+        <div id="data-stats">loading…</div>
+      </section>
+    </div>
+    <section class="data-card">
+      <h3><i class="fa-solid fa-file-contract" style="color:var(--acc)"></i> API contracts <span class="data-badge">4 · indexed on APIs.io</span></h3>
+      <p class="data-sub">Each contract groups related endpoints. Click any path to copy the full URL.</p>
+      <div class="contract-grid" id="contract-grid"></div>
+    </section>
+    <section class="data-card">
+      <h3><i class="fa-solid fa-tags" style="color:var(--acc)"></i> Tagged areas</h3>
+      <div class="data-tags">${info.tags.map(t => `<span class="data-tag">${esc(t)}</span>`).join("")}</div>
+    </section>
+    <section class="data-card">
+      <h3><i class="fa-solid fa-server" style="color:var(--acc)"></i> Round-robin DNS pool</h3>
+      <div id="server-pool">loading…</div>
+    </section>
+    <section class="data-card">
+      <h3><i class="fa-solid fa-terminal" style="color:var(--acc)"></i> Endpoint explorer</h3>
+      <p class="data-sub">All paths are relative to <code>${esc(info.apiRoot)}</code>. Add <code>?limit=N&hidebroken=true</code> as needed.</p>
+      <div id="endpoint-list"></div>
+    </section>
+  `;
+  renderContracts();
+  renderEndpoints();
+  refreshDataStatus();
+}
+
+async function refreshDataStatus() {
+  const statusEl = $("#data-status");
+  const poolEl = $("#server-pool");
+  const statsEl = $("#data-stats");
+
+  const servers = await fetchJSONSmart("https://all.api.radio-browser.info/json/servers", { timeout: 12000 });
+  if (statusEl) {
+    statusEl.innerHTML = (Array.isArray(servers) && servers.length)
+      ? `<div class="status-ok"><i class="fa-solid fa-circle-check"></i> Pool reachable · ${servers.length} mirrors</div>`
+      : `<div class="status-err"><i class="fa-solid fa-triangle-exclamation"></i> Pool unreachable — falling back to jina</div>`;
+  }
+  if (poolEl) {
+    if (Array.isArray(servers) && servers.length) {
+      poolEl.innerHTML = `<table class="pool-table">
+        <thead><tr><th>Mirror</th><th>IPv4</th><th>IPv6</th><th>Status</th></tr></thead>
+        <tbody>${servers.map(s => `
+          <tr>
+            <td><code>${esc(s.name || "")}</code></td>
+            <td>${s.ip4 ? '<i class="fa-solid fa-check status-yes"></i>' : '—'}</td>
+            <td>${s.ip6 ? '<i class="fa-solid fa-check status-yes"></i>' : '—'}</td>
+            <td>${/^ok$/i.test(s.status || '') ? '<span class="pill-ok">online</span>' : esc(s.status || 'unknown')}</td>
+          </tr>`).join("")}</tbody></table>`;
+    } else {
+      poolEl.innerHTML = `<div class="status-err">Couldn't load server pool.</div>`;
+    }
+  }
+
+  const stats = await fetchJSONSmart("https://all.api.radio-browser.info/json/stats", { timeout: 12000 });
+  if (statsEl) {
+    if (stats && typeof stats === "object") {
+      statsEl.innerHTML = `
+        <div class="stat"><b>${(stats.stations||0).toLocaleString()}</b><span>stations</span></div>
+        <div class="stat"><b>${(stats.countries||0).toLocaleString()}</b><span>countries</span></div>
+        <div class="stat"><b>${(stats.tags||0).toLocaleString()}</b><span>tags</span></div>
+        <div class="stat"><b>${(stats.languages||0).toLocaleString()}</b><span>languages</span></div>
+      `;
+    } else {
+      statsEl.innerHTML = `<div class="status-err">Stats unavailable.</div>`;
+    }
+  }
+}
+
+function loadDataView() {
+  $("#ai-panel").hidden = true;
+  $("#data-panel").hidden = false;
+  $("#grid").hidden = true;
+  $("#more-wrap").hidden = true;
+  $("#more-loader").classList.remove("show");
+  $("#title").textContent = "Data — Radio Browser API";
+  $("#count").textContent = "4 contracts · no API keys · round-robin DNS pool";
+  renderDataShell();
+}
+
+/* Copy-to-clipboard for any [data-copy] element inside the data panel */
+$("#data-panel").addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-copy]");
+  if (!el) return;
+  const url = el.dataset.copy;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast("📋 Copied: " + url, 2600);
+  } catch {
+    prompt("Copy URL:", url);
+  }
+});
+
+/* ======================= FFmpeg ======================= */
+let ffmpegInstance = null;
+let ffmpegLoading = null;
+let ffmpegVersions = null;
+let _progressCallback = null;
+let ffmpegLogBuffer = [];
+function formatVerLine(v) { return v.replace(/\s*\/\s*/g, " / ").replace(/\s+/g, " ").trim(); }
+function renderLibVersions() {
+  const tags = $("#lib-tags");
+  if (!tags) return;
+  tags.innerHTML = FFMPEG_LIBS.map(lib => {
+    const v = ffmpegVersions && ffmpegVersions[lib];
+    return `<span class="lib-tag ${v ? "loaded" : "pending"}" title="${v ? esc(formatVerLine(v)) : "not yet loaded"}">${lib}${v ? " " + esc(formatVerLine(v).split(" ")[0]) : ""}</span>`;
+  }).join("");
+  const hint = $("#lib-hint");
+  if (hint) hint.textContent = ffmpegVersions ? `✅ ${Object.keys(ffmpegVersions).length} / 7 loaded` : "loads on first encode";
+}
+async function loadFFmpeg() {
+  if (ffmpegInstance) return ffmpegInstance;
+  if (ffmpegLoading) return ffmpegLoading;
+  ffmpegLoading = (async () => {
+    await loadScript(FFMPEG_CDN.ffmpeg);
+    await loadScript(FFMPEG_CDN.util);
+    const { FFmpeg } = window.FFmpegWASM;
+    const { toBlobURL } = window.FFmpegUtil;
+    const ff = new FFmpeg();
+    ff.on("log", ({ type, message }) => {
+      if (!message) return;
+      ffmpegLogBuffer.push({ type, message, t: Date.now() });
+      if (ffmpegLogBuffer.length > 300) ffmpegLogBuffer.splice(0, ffmpegLogBuffer.length - 300);
+      for (const line of message.split("\n")) {
+        const m = line.match(/\b(lib(?:av|sw)\w+)\s+([\d.]+\s*\/\s*[\d.]+)/);
+        if (m) {
+          if (!ffmpegVersions) ffmpegVersions = {};
+          ffmpegVersions[m[1]] = m[2];
+          renderLibVersions();
+        }
+      }
+      const pre = $("#ff-log");
+      if (pre) {
+        const lines = ffmpegLogBuffer.slice(-100).map(l => `${l.type === "stderr" ? "!" : " "} ${l.message}`);
+        pre.textContent = lines.join("\n");
+        pre.scrollTop = pre.scrollHeight;
+      }
+    });
+    ff.on("progress", ({ progress, time }) => { if (_progressCallback) _progressCallback(progress, time); });
+    const coreURL = await toBlobURL(`${FFMPEG_CDN.core}/ffmpeg-core.js`, "text/javascript");
+    const wasmURL = await toBlobURL(`${FFMPEG_CDN.core}/ffmpeg-core.wasm`, "application/wasm");
+    await ff.load({ coreURL, wasmURL });
+    ffmpegInstance = ff;
+    try { await ff.exec(["-version"]); } catch {}
+    return ff;
+  })();
+  return ffmpegLoading;
+}
+async function fetchChunked(url, maxMs, maxBytes) {
+  const ctl = new AbortController();
+  const connectTimer = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const res = await fetch(url, { signal: ctl.signal, mode: "cors" });
+    clearTimeout(connectTimer);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const reader = res.body.getReader();
+    const chunks = [];
+    let total = 0;
+    const readTimer = setTimeout(() => { try { reader.cancel(); } catch {} }, maxMs);
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value); total += value.length;
+        if (total >= maxBytes) { try { await reader.cancel(); } catch {} break; }
+      }
+    } catch {}
+    finally { clearTimeout(readTimer); }
+    return new Blob(chunks);
+  } finally { clearTimeout(connectTimer); }
+}
+async function fetchStreamSmart(url, maxSeconds, bitrateKbps) {
+  const maxBytes = Math.min(100 * 1024 * 1024, Math.ceil((bitrateKbps || 192) * 128 * maxSeconds) + 5 * 1024 * 1024);
+  const candidates = [
+    { label: "direct", url },
+    { label: "corsproxy.io", url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
+    { label: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+    { label: "codetabs", url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` },
+  ];
+  let lastErr;
+  for (const c of candidates) {
+    try {
+      const blob = await fetchChunked(c.url, maxSeconds * 1000, maxBytes);
+      if (blob && blob.size > 2000) return { blob, via: c.label };
+    } catch (e) { lastErr = e; }
+  }
+  throw new Error("All fetch paths failed (" + (lastErr?.message || "unknown") + ")");
+}
+async function fetchImageSmart(url) {
+  const candidates = [url, `https://corsproxy.io/?${encodeURIComponent(url)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`];
+  for (const u of candidates) {
+    try {
+      const res = await fetch(u, { mode: "cors" });
+      if (!res.ok) continue;
+      const b = await res.blob();
+      if (b.size > 500) return b;
+    } catch {}
+  }
+  return null;
+}
+function buildFFmpegArgs(opts, hasCover) {
+  const enc = ENCODERS[opts.format];
+  const args = ["-i", "input.bin"];
+  if (hasCover && (opts.format === "mp3" || opts.format === "m4a")) args.push("-i", "cover.jpg");
+  if (opts.trimStart > 0) args.push("-ss", String(opts.trimStart));
+  if (opts.duration > 0) args.push("-t", String(opts.duration));
+  const chain = FILTER_PRESETS[opts.filter]?.chain || "";
+  if (chain) args.push("-af", chain);
+  args.push("-c:a", enc.codec);
+  if (enc.lossy && opts.format !== "flac" && opts.format !== "wav") args.push("-b:a", `${opts.bitrate}k`);
+  if (opts.format === "flac") args.push("-compression_level", "8");
+  args.push("-ar", String(opts.sampleRate));
+  args.push("-ac", String(opts.channels));
+  if (hasCover && (opts.format === "mp3" || opts.format === "m4a")) {
+    args.push("-map", "0:a", "-map", "1:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic");
+    if (opts.format === "m4a") args.push("-movflags", "+faststart");
+  }
+  args.push("-f", enc.fmt);
+  args.push(`output.${enc.ext}`);
+  return args;
+}
+async function ffmpegEncode(s, opts, setStatus, setProgress) {
+  setStatus("⚡ Loading FFmpeg.wasm — full libav* stack (~25 MB)…");
+  const ff = await loadFFmpeg();
+  setStatus(`✅ Loaded: ${Object.keys(ffmpegVersions || {}).filter(k => FFMPEG_LIBS.includes(k)).length}/7 libraries`);
+  let hasCover = false;
+  if (opts.embedArt && (opts.format === "mp3" || opts.format === "m4a")) {
+    const artUrl = aiArt[s.stationuuid] || logoUrl(s.favicon);
+    if (artUrl) {
+      try {
+        setStatus("🖼️ Downloading cover art…");
+        const img = await fetchImageSmart(artUrl);
+        if (img && img.size > 1000) {
+          await ff.writeFile("cover.jpg", new Uint8Array(await img.arrayBuffer()));
+          hasCover = true;
+        }
+      } catch {}
+    }
+  }
+  const fetchSecs = opts.duration + opts.trimStart + 15;
+  setStatus(`📡 Fetching ${fetchSecs}s of audio…`);
+  const { blob, via } = await fetchStreamSmart(pickStationUrl(s), fetchSecs, opts.bitrate);
+  if (blob.size < 2000) throw new Error("Fetched stream too small");
+  setStatus(`📡 Fetched ${(blob.size / 1024 / 1024).toFixed(2)} MB via ${via}`);
+  await ff.writeFile("input.bin", new Uint8Array(await blob.arrayBuffer()));
+  const args = buildFFmpegArgs(opts, hasCover);
+  const enc = ENCODERS[opts.format];
+  const outName = `output.${enc.ext}`;
+  setStatus(`🔧 Encoding → ${opts.format.toUpperCase()} (${enc.lossy ? opts.bitrate + "k · " : ""}${opts.sampleRate}Hz · ${opts.channels === 1 ? "mono" : "stereo"})…`);
+  setProgress(0);
+  _progressCallback = (p) => setProgress(Math.max(0, Math.min(1, p)));
+  try { await ff.exec(args); } finally { _progressCallback = null; }
+  const data = await ff.readFile(outName);
+  try { await ff.deleteFile("input.bin"); } catch {}
+  try { await ff.deleteFile("cover.jpg"); } catch {}
+  try { await ff.deleteFile(outName); } catch {}
+  if (!data || data.length < 1000) throw new Error("FFmpeg produced empty output");
+  return { blob: new Blob([data.buffer], { type: enc.mime }), ext: enc.ext };
+}
+function buildCliCommand(s, opts) {
+  const url = pickStationUrl(s);
+  const enc = ENCODERS[opts.format];
+  const parts = ["ffmpeg", "-i", `"${url}"`];
+  if (opts.trimStart > 0) parts.push("-ss", String(opts.trimStart));
+  if (opts.duration > 0) parts.push("-t", String(opts.duration));
+  const chain = FILTER_PRESETS[opts.filter]?.chain;
+  if (chain) parts.push('-af', `"${chain}"`);
+  parts.push("-c:a", enc.codec);
+  if (enc.lossy && opts.format !== "flac" && opts.format !== "wav") parts.push("-b:a", `${opts.bitrate}k`);
+  if (opts.format === "flac") parts.push("-compression_level", "8");
+  parts.push("-ar", String(opts.sampleRate), "-ac", String(opts.channels));
+  parts.push("-f", enc.fmt);
+  parts.push(`"${sanitizeName(s.name)}.${enc.ext}"`);
+  return parts.join(" ");
+}
+async function recordWithMediaRecorder(s, seconds, setStatus) {
+  const url = pickStationUrl(s);
+  setStatus(`🎙️ Quick recording ${seconds}s from stream…`);
+  const recAudio = new Audio();
+  recAudio.crossOrigin = "anonymous";
+  recAudio.src = url;
+  try { await recAudio.play(); } catch (e) { throw new Error("Could not start stream: " + e.message); }
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ctx.createMediaElementSource(recAudio);
+  const dest = ctx.createMediaStreamDestination();
+  src.connect(dest);
+  const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "audio/webm";
+  const rec = new MediaRecorder(dest.stream, { mimeType: mime });
+  const chunks = [];
+  rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+  rec.start();
+  const start = Date.now();
+  const tick = setInterval(() => { setStatus(`🎙️ Quick recording… ${Math.round((Date.now()-start)/1000)}s / ${seconds}s`); }, 500);
+  await new Promise(r => setTimeout(r, seconds * 1000));
+  clearInterval(tick);
+  rec.stop();
+  await new Promise(r => { rec.onstop = r; });
+  try { recAudio.pause(); } catch {}
+  try { await ctx.close(); } catch {}
+  const blob = new Blob(chunks, { type: "audio/webm" });
+  if (blob.size < 2000) throw new Error("Recording empty — stream may block CORS");
+  return blob;
+}
+
+/* ======================= load states ======================= */
+function buildSearchParams(offset) {
+  const p = { limit: PAGE, offset, hidebroken: true, order: state.order, reverse: state.order === "name" ? false : true };
+  if (state.query) p.name = state.query;
+  if (state.tag) p.tag = state.tag;
+  if (state.country) p.countrycode = state.country;
+  if (state.language) p.language = state.language;
+  if (state.codec) p.codec = state.codec;
+  if (state.minBitrate) p.bitrateMin = state.minBitrate;
+  return p;
+}
+function skeletons(n = 12) { $("#grid").innerHTML = Array.from({length:n}, () => '<div class="skeleton"></div>').join(""); }
+function showEmpty(title, sub) { $("#grid").innerHTML = `<div class="empty"><b>${esc(title)}</b>${esc(sub||"")}</div>`; }
+
+/* Reset the "load more" UI to its idle state */
+function resetMoreUI() {
+  const btn = $("#more");
+  if (btn) {
+    btn.classList.remove("loading");
+    btn.disabled = false;
+    const lbl = $("#more-label");
+    if (lbl) lbl.textContent = "Load more";
+  }
+  const loader = $("#more-loader");
+  if (loader) loader.classList.remove("show");
+}
+
+async function load(reset = true) {
+  if (abortCtl) abortCtl.abort();
+  abortCtl = new AbortController();
+  const signal = abortCtl.signal;
+  /* Any new load cancels any in-flight load-more */
+  loadMoreInFlight = false;
+  resetMoreUI();
+  if (reset) { state.offset = 0; state.items = []; renderedIds.clear(); }
+  const view = state.view;
+
+  if (view === "data") { loadDataView(); return; }
+
+  $("#grid").hidden = false;
+  $("#data-panel").hidden = true;
+
+  if (view === "countries") return loadCountriesView();
+
+  if (view === "favorites" || view === "recent") {
+    const list = view === "favorites" ? state.favorites : state.recent;
+    state.items = list.slice();
+    $("#title").textContent = view === "favorites" ? "Your favorites" : "Recently played";
+    $("#count").textContent = list.length ? `${list.length} station${list.length === 1 ? "" : "s"}` : "";
+    $("#more-wrap").hidden = true;
+    if (!list.length) {
+      showEmpty(view === "favorites" ? "No favorites yet" : "Nothing played yet",
+        view === "favorites" ? "Tap the ♥ on any station to save it here." : "Stations you play will appear here.");
+      return;
+    }
+    renderStations(state.items);
+    return;
+  }
+  if (view === "ai") return;
+  state.loading = true;
+  if (reset) skeletons();
+  try {
+    let list;
+    if (view === "top" && reset) {
+      list = await apiRetry("/json/stations/topclick/100", { hidebroken: true }, signal);
+      state.items = list;
+      $("#title").textContent = "Top stations";
+      $("#count").textContent = `${list.length} stations by popularity`;
+      $("#more-wrap").hidden = true;
+      renderStations(list);
+      return;
+    }
+    list = await apiRetry("/json/stations/search", buildSearchParams(state.offset), signal);
+    state.items = reset ? list : state.items.concat(list);
+    state.offset += PAGE;
+    $("#title").textContent = state.query ? `Results for “${state.query}”` : "Search results";
+    $("#count").textContent = `${state.items.length} shown${state.lastVia === "jina" ? " · 🛰️ jina" : ""}`;
+    if (!state.items.length) {
+      showEmpty("No stations found", "Try a different name, country, genre or clear the filters.");
+      $("#more-wrap").hidden = true;
+    } else {
+      renderStations(state.items);
+      $("#more-wrap").hidden = list.length < PAGE;
+    }
+  } catch (e) {
+    if (e && e.name === "AbortError") return;
+    console.error(e);
+    showEmpty("Couldn't reach the radio directory", "Try enabling r.jina.ai proxy in filters.");
+    $("#more-wrap").hidden = true;
+  } finally { state.loading = false; }
+}
+
+/* ==================================================================
+   LOAD MORE — animated progress circle for incremental fetches
+   ================================================================== */
+async function loadMore() {
+  /* Guards: don't run twice, don't run while another load is in flight,
+     only run for the search view (the only view that paginates). */
+  if (loadMoreInFlight) return;
+  if (state.loading) return;
+  if (state.view !== "search") return;
+  if (!state.items.length) return;
+
+  loadMoreInFlight = true;
+  state.loading = true;
+
+  /* Always use a fresh abort controller — the previous one may have
+     been aborted by a filter change or a fresh load(). */
+  if (abortCtl) { try { abortCtl.abort(); } catch {} }
+  abortCtl = new AbortController();
+  const signal = abortCtl.signal;
+
+  const moreBtn = $("#more");
+  const moreWrap = $("#more-wrap");
+  const loader = $("#more-loader");
+  const loaderText = $("#more-loader-text");
+  const moreLabel = $("#more-label");
+
+  if (moreBtn) { moreBtn.classList.add("loading"); moreBtn.disabled = true; }
+  if (moreLabel) moreLabel.textContent = "Loading…";
+  if (loader) loader.classList.add("show");
+  if (loaderText) loaderText.innerHTML = `Loading <b>${PAGE}</b> more stations…`;
+
+  try {
+    const list = await apiRetry("/json/stations/search", buildSearchParams(state.offset), signal);
+    if (!Array.isArray(list)) throw new Error("Invalid API response");
+
+    if (list.length === 0) {
+      if (loaderText) loaderText.textContent = "No more stations to load.";
+      if (moreWrap) moreWrap.hidden = true;
+      return;
+    }
+
+    state.items = state.items.concat(list);
+    state.offset += list.length;
+
+    const fresh = list.filter(s => s.stationuuid && !renderedIds.has(s.stationuuid));
+    fresh.forEach(s => { byId.set(s.stationuuid, s); renderedIds.add(s.stationuuid); });
+
+    const grid = $("#grid");
+    const empty = grid.querySelector(".empty");
+    if (empty) empty.remove();
+    if (fresh.length) grid.insertAdjacentHTML("beforeend", fresh.map(cardHTML).join(""));
+
+    $("#count").textContent = `${state.items.length} shown${state.lastVia === "jina" ? " · 🛰️ jina" : ""}`;
+    if (loaderText) loaderText.innerHTML = `✅ Loaded <b>${fresh.length}</b> more · total <b>${state.items.length}</b>`;
+
+    /* Show button again if the API returned a full page */
+    if (moreWrap) moreWrap.hidden = list.length < PAGE;
+  } catch (err) {
+    if (err.name === "AbortError") return;
+    console.error("[loadMore]", err);
+    if (loaderText) loaderText.textContent = "⚠️ Couldn't load more — try again.";
+    if (moreWrap) moreWrap.hidden = false;
+  } finally {
+    loadMoreInFlight = false;
+    state.loading = false;
+    if (moreBtn) { moreBtn.classList.remove("loading"); moreBtn.disabled = false; }
+    if (moreLabel) moreLabel.textContent = "Load more";
+    setTimeout(() => { if (loader) loader.classList.remove("show"); }, 1400);
+  }
+}
+
+async function loadCountriesView() {
+  $("#title").textContent = "Browse by country";
+  $("#more-wrap").hidden = true;
+  $("#count").textContent = "loading…";
+  if (!cachedCountries.length) {
+    skeletons(15);
+    await loadAllCountries();
+  }
+  if (!cachedCountries.length) {
+    showEmpty("Couldn't load countries", "Try again or enable jina proxy.");
+    return;
+  }
+  $("#count").textContent = `${cachedCountries.length} countries · ${cachedCountries.reduce((a,c)=>a+(c.stationcount||0),0).toLocaleString()} stations total`;
+  const grid = $("#grid");
+  grid.innerHTML = cachedCountries.map(c => {
+    const flag = countryFlagEmoji(c.iso_3166_1);
+    const count = (c.stationcount || 0).toLocaleString();
+    return `
+      <article class="card country-card" data-country="${esc(c.iso_3166_1)}" data-name="${esc(c.name)}" tabindex="0" role="button" aria-label="Browse ${esc(c.name)}">
+        <div class="logo"><span style="position:static">${flag}</span></div>
+        <div class="meta">
+          <h3>${esc(c.name)}</h3>
+          <div class="sub">${count} stations</div>
+        </div>
+        <div class="fav" style="pointer-events:none"><i class="fa-solid fa-chevron-right"></i></div>
+      </article>`;
+  }).join("");
+}
+
+async function loadAllStations() {
+  const btn = $("#load-all"); btn.disabled = true;
+  const PAGE_SIZE = 1000; const all = []; let offset = 0;
+  toast("📥 Loading all stations — takes a minute…", 4000);
+  while (all.length < API_MAX) {
+    const viaTag = state.forceJina || state.lastVia === "jina" ? " (via jina)" : "";
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Loading… ${all.length.toLocaleString()}${viaTag}`;
+    try {
+      const list = await apiRetry("/json/stations/search", { limit: PAGE_SIZE, offset, hidebroken: true, order: "clickcount", reverse: true });
+      if (!list || !list.length) break;
+      all.push(...list); offset += PAGE_SIZE;
+      await cacheStations(list);
+      if (list.length < PAGE_SIZE) break;
+      await new Promise(r => setTimeout(r, state.lastVia === "jina" ? 500 : 120));
+    } catch (e) { console.error("load-all failed", offset, e); break; }
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Load all ~50k stations';
+  toast(`✅ Cached ${all.length.toLocaleString()} stations locally`);
+  if (all.length) {
+    state.items = all; state.view = "search";
+    $$(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === "search")));
+    $("#title").textContent = "All stations (local cache)";
+    $("#count").textContent = `${all.length.toLocaleString()} stations loaded${state.lastVia === "jina" ? " · 🛰️ jina" : ""}`;
+    $("#more-wrap").hidden = true;
+    renderStations(all);
+  }
+}
+
+/* ======================= rendering ======================= */
+function cardHTML(s) {
+  const url = pickStationUrl(s);
+  const blocked = isHttpsBlocked(url);
+  const hasLive = !!(s.stationuuid && liveUrlOverrides[s.stationuuid]) || !!liveUrlOverrides["name:" + (s.name||"").toLowerCase().trim()];
+  const tags = String(s.tags || "").split(",").map(t => t.trim()).filter(Boolean).slice(0, 3);
+  const initial = esc((s.name || "?").trim().charAt(0).toUpperCase());
+  const fav = state.favorites.some(f => f.stationuuid === s.stationuuid);
+  const playing = state.current && state.current.stationuuid === s.stationuuid;
+  const art = aiArt[s.stationuuid] || logoUrl(s.favicon);
+  const sub = [s.country || s.countrycode || "Unknown", s.codec || "", s.bitrate ? `${s.bitrate} kbps` : ""].filter(Boolean).join(" · ");
+  const chips = tags.map(t => `<span class="chip">${esc(t)}</span>`).join("") +
+    (aiArt[s.stationuuid] ? `<span class="chip ai">AI ART</span>` : "") +
+    (hasLive ? `<span class="chip live" title="Live URL synced from HEX-RADIO"><i class="fa-solid fa-bolt" style="margin-right:2px"></i>LIVE</span>` : "") +
+    (blocked && !hasLive ? `<span class="chip warn" title="Plain HTTP stream may be blocked on HTTPS">HTTP</span>` : "");
+  return `
+    <article class="card${playing ? " playing" : ""}" data-id="${esc(s.stationuuid)}" tabindex="0" role="button" aria-label="Play ${esc(s.name)}">
+      <div class="logo"><span>${initial}</span>${art ? `<img alt="" loading="lazy" decoding="async" src="${esc(art)}" onerror="this.remove()">` : ""}</div>
+      <div class="meta">
+        <h3>${esc(s.name || "Unnamed station")}</h3>
+        <div class="sub">${esc(sub)}</div>
+        ${chips ? `<div class="chips">${chips}</div>` : ""}
+      </div>
+      <button class="fav${fav ? " on" : ""}" data-fav="${esc(s.stationuuid)}" title="Favorite" aria-label="Toggle favorite" aria-pressed="${fav}">
+        <i class="fa-${fav ? "solid" : "regular"} fa-heart"></i>
+      </button>
+    </article>`;
+}
+function renderStations(list) {
+  renderedIds.clear();
+  list.forEach(s => { byId.set(s.stationuuid, s); renderedIds.add(s.stationuuid); });
+  $("#grid").innerHTML = list.map(cardHTML).join("");
+}
+function refreshCardStates() {
+  $$("#grid .card").forEach(el => {
+    const id = el.dataset.id;
+    el.classList.toggle("playing", !!state.current && state.current.stationuuid === id);
+    const fb = $(".fav", el);
+    if (fb) {
+      const on = state.favorites.some(f => f.stationuuid === id);
+      fb.classList.toggle("on", on);
+      fb.setAttribute("aria-pressed", String(on));
+      const i = fb.querySelector("i");
+      if (i) i.className = `fa-${on ? "solid" : "regular"} fa-heart`;
+    }
+  });
+}
+
+/* ======================= player ======================= */
+const audio = $("#audio");
+let isPlaying = false;
+function setPlayIcon(playing) {
+  const btn = $("#p-play");
+  if (!btn) return;
+  btn.innerHTML = playing ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+  btn.setAttribute("aria-label", playing ? "Pause" : "Play");
+  $("#eq").classList.toggle("on", playing);
+}
+function updateMediaSession(s) {
+  if (!("mediaSession" in navigator)) return;
+  try {
+    const art = aiArt[s.stationuuid] || logoUrl(s.favicon);
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: s.name || "Radio",
+      artist: [s.country, s.codec].filter(Boolean).join(" · ") || "Live radio",
+      album: "HEX AI-RADIO",
+      artwork: art ? [{ src: art, sizes: "512x512", type: "image/jpeg" }] : [],
+    });
+    navigator.mediaSession.setActionHandler("play", () => audio.play().catch(()=>{}));
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+    navigator.mediaSession.setActionHandler("stop", () => stopPlayback());
+  } catch {}
+}
+function playStation(s) {
+  if (!s) return;
+  const url = pickStationUrl(s);
+  if (!url) { toast("This station has no stream URL."); return; }
+  state.current = s;
+  $("#player").classList.add("show");
+  $("#p-title").textContent = s.name || "Unnamed station";
+  $("#p-sub").textContent = [s.country, s.codec, s.bitrate ? s.bitrate + " kbps" : ""].filter(Boolean).join(" · ") || "Live";
+  updatePlayerArt(s);
+  if (isHttpsBlocked(url)) toast("This stream is plain HTTP — may be blocked on HTTPS.", 5000);
+  audio.src = url; audio.load();
+  audio.play().then(() => { isPlaying = true; setPlayIcon(true); })
+    .catch(err => {
+      isPlaying = false; setPlayIcon(false);
+      if (err && err.name === "NotAllowedError") toast("Tap play to start audio.");
+      else toast("Couldn't play this stream. The station may be offline.");
+    });
+  updateMediaSession(s);
+  addRecent(s);
+  refreshCardStates();
+  updatePlayerFav();
+}
+function stopPlayback() {
+  audio.pause(); audio.removeAttribute("src"); audio.load();
+  isPlaying = false; setPlayIcon(false);
+  $("#player").classList.remove("show");
+  state.current = null;
+  refreshCardStates();
+}
+function togglePlay() {
+  if (!state.current) return;
+  if (audio.paused) audio.play().then(() => { isPlaying = true; setPlayIcon(true); }).catch(() => toast("Couldn't resume."));
+  else audio.pause();
+}
+function updatePlayerFav() {
+  const on = !!state.current && state.favorites.some(f => f.stationuuid === state.current.stationuuid);
+  const btn = $("#p-fav");
+  btn.style.color = on ? "var(--danger)" : "";
+  btn.innerHTML = `<i class="fa-${on ? "solid" : "regular"} fa-heart"></i>`;
+  btn.setAttribute("aria-pressed", String(on));
+}
+
+/* ======================= favorites / recent ======================= */
+const trim = (s) => ({
+  stationuuid:s.stationuuid, name:s.name, url:s.url, url_resolved:s.url_resolved,
+  favicon:s.favicon, country:s.country, countrycode:s.countrycode,
+  tags:s.tags, codec:s.codec, bitrate:s.bitrate, homepage:s.homepage,
+});
+function toggleFavorite(id) {
+  const s = byId.get(id) || (state.current && state.current.stationuuid === id ? state.current : null);
+  if (!s) return;
+  const i = state.favorites.findIndex(f => f.stationuuid === id);
+  if (i >= 0) { state.favorites.splice(i, 1); toast("Removed from favorites"); }
+  else { state.favorites.unshift(trim(s)); toast("Added to favorites ♥"); }
+  saveLS(LS.fav, state.favorites);
+  refreshCardStates(); updatePlayerFav();
+  if (state.view === "favorites") load();
+}
+function addRecent(s) {
+  const t = trim(s);
+  state.recent = state.recent.filter(r => r.stationuuid !== t.stationuuid);
+  state.recent.unshift(t);
+  if (state.recent.length > MAX_RECENT) state.recent.length = MAX_RECENT;
+  saveLS(LS.recent, state.recent);
+}
+
+/* ======================= filters ======================= */
+let filtersLoaded = false;
+async function loadFilterOptions() {
+  if (filtersLoaded) return;
+  filtersLoaded = true;
+  try {
+    await loadAllCountries();
+    const tags = await apiRetry("/json/tags", { order: "stationcount", reverse: true, limit: 120 }).catch(() => []);
+    const tSel = $("#f-tag");
+    (Array.isArray(tags) ? tags : []).forEach(t => {
+      if (!t || !t.name) return;
+      const o = document.createElement("option");
+      o.value = t.name;
+      o.textContent = `${t.name} (${t.stationcount})`;
+      tSel.appendChild(o);
+    });
+  } catch {}
+}
+
+/* ======================= AI model pills ======================= */
+function renderModelPills() {
+  $("#ai-models").innerHTML = AI_MODELS.map(m =>
+    `<button class="model-pill${m.id === state.aiModel ? " on" : ""}" data-model="${esc(m.id)}" role="radio" aria-checked="${m.id === state.aiModel}" title="${esc(m.provider)}">${esc(m.label)}</button>`
+  ).join("");
+}
+$("#ai-models").addEventListener("click", (e) => {
+  const pill = e.target.closest("[data-model]");
+  if (!pill) return;
+  state.aiModel = pill.dataset.model;
+  saveLS(LS.model, state.aiModel);
+  renderModelPills();
+  setAIStatus(AI_PHASES.IDLE, `Model: ${AI_MODELS.find(m => m.id === state.aiModel)?.label}. Describe your mood.`, { progress: 0 });
+});
+
+/* ======================= export modal ======================= */
+const dlModal = $("#dl-modal");
+function buildFilterOptionsSelect() {
+  const sel = $("#ff-filter");
+  sel.innerHTML = Object.entries(FILTER_PRESETS).map(([k, v]) =>
+    `<option value="${esc(k)}">${esc(v.label)}</option>`
+  ).join("");
+}
+function readExportOpts() {
+  return {
+    format: $("#ff-format").value,
+    bitrate: parseInt($("#ff-bitrate").value, 10) || 192,
+    sampleRate: parseInt($("#ff-sr").value, 10) || 44100,
+    channels: parseInt($("#ff-ch").value, 10) || 2,
+    filter: $("#ff-filter").value,
+    duration: Math.max(5, Math.min(1800, parseInt($("#ff-duration").value, 10) || 60)),
+    trimStart: Math.max(0, Math.min(300, parseInt($("#ff-trim").value, 10) || 0)),
+    embedArt: $("#ff-art").checked,
+  };
+}
+function openExportModal() {
+  if (!state.current) return;
+  $("#dl-name").textContent = state.current.name || "station";
+  $("#dl-status").textContent = ""; $("#dl-status").className = "dl-status";
+  $("#ff-progress-wrap").hidden = true;
+  $("#ff-progress-inner").style.width = "0%";
+  $("#ff-progress-text").textContent = "0%";
+  renderLibVersions();
+  dlModal.hidden = false;
+}
+function closeExportModal() { dlModal.hidden = true; }
+$("#dl-cmd").addEventListener("click", async () => {
+  if (!state.current) return;
+  const cmd = buildCliCommand(state.current, readExportOpts());
+  try { await navigator.clipboard.writeText(cmd); toast("📋 CLI command copied"); }
+  catch { prompt("Copy FFmpeg command:", cmd); }
+});
+$("#dl-quick").addEventListener("click", async () => {
+  if (!state.current) return;
+  const opts = readExportOpts();
+  const status = $("#dl-status");
+  status.classList.add("show"); status.className = "dl-status show";
+  const setStatus = (msg) => { status.textContent = msg; };
+  try {
+    const blob = await recordWithMediaRecorder(state.current, opts.duration, setStatus);
+    download(blob, `${sanitizeName(state.current.name)}-${opts.duration}s.webm`);
+    status.textContent = `✅ Quick record done: ${(blob.size/1024).toFixed(0)} KB (WebM)`;
+    status.className = "dl-status ok show";
+  } catch (err) {
+    status.textContent = "❌ " + err.message;
+    status.className = "dl-status err show";
+  }
+});
+$("#dl-encode").addEventListener("click", async () => {
+  if (!state.current) return;
+  const opts = readExportOpts();
+  const status = $("#dl-status");
+  const progressWrap = $("#ff-progress-wrap");
+  const progressInner = $("#ff-progress-inner");
+  const progressText = $("#ff-progress-text");
+  const setStatus = (msg) => { status.textContent = msg; status.className = "dl-status show"; };
+  const setProgress = (p) => { const pct = Math.round(p * 100); progressInner.style.width = pct + "%"; progressText.textContent = pct + "%"; };
+  const encodeBtn = $("#dl-encode");
+  encodeBtn.disabled = true;
+  progressWrap.hidden = false;
+  try {
+    const { blob, ext } = await ffmpegEncode(state.current, opts, setStatus, setProgress);
+    download(blob, `${sanitizeName(state.current.name)}.${ext}`);
+    status.textContent = `✅ Encoded: ${(blob.size/1024).toFixed(1)} KB · ${opts.format.toUpperCase()} · ${opts.bitrate}k · ${opts.sampleRate}Hz · ${opts.channels === 1 ? "mono" : "stereo"}`;
+    status.className = "dl-status ok show";
+    setProgress(1);
+  } catch (err) {
+    console.error(err);
+    status.textContent = "❌ " + (err.message || "Encode failed") + " — try Quick record or CLI command.";
+    status.className = "dl-status err show";
+  } finally { encodeBtn.disabled = false; }
+});
+$("#dl-close").addEventListener("click", closeExportModal);
+dlModal.addEventListener("click", (e) => { if (e.target === dlModal) closeExportModal(); });
+
+function loadFFOpts() {
+  try {
+    const o = JSON.parse(localStorage.getItem(FF_OPTS_LS) || "{}");
+    if (o.format) $("#ff-format").value = o.format;
+    if (o.bitrate) $("#ff-bitrate").value = o.bitrate;
+    if (o.sampleRate) $("#ff-sr").value = o.sampleRate;
+    if (o.channels) $("#ff-ch").value = o.channels;
+    if (o.filter) $("#ff-filter").value = o.filter;
+    if (o.duration) $("#ff-duration").value = o.duration;
+    if (o.trimStart) $("#ff-trim").value = o.trimStart;
+    if (o.embedArt) $("#ff-art").checked = true;
+  } catch {}
+}
+function saveFFOpts() {
+  try { localStorage.setItem(FF_OPTS_LS, JSON.stringify(readExportOpts())); } catch {}
+}
+["#ff-format","#ff-bitrate","#ff-sr","#ff-ch","#ff-filter","#ff-duration","#ff-trim","#ff-art"].forEach(sel => {
+  const el = $(sel);
+  if (el) el.addEventListener("change", saveFFOpts);
+});
+
+/* ======================= events ======================= */
+$$(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    $$(".tab").forEach(t => t.setAttribute("aria-selected", "false"));
+    tab.setAttribute("aria-selected", "true");
+    state.view = tab.dataset.view;
+    $("#ai-panel").hidden = state.view !== "ai";
+    $("#data-panel").hidden = state.view !== "data";
+    $("#grid").hidden = state.view === "data";
+    if (state.view === "ai") {
+      $("#title").textContent = "AI station discovery";
+      $("#count").textContent = "";
+      clearGridForAI();
+      $("#more-wrap").hidden = true;
+      resetMoreUI();
+      resetAIStatus();
+      setTimeout(() => $("#ai-prompt").focus(), 100);
+      return;
+    }
+    if (state.view === "data") { loadDataView(); return; }
+    load(true);
+  });
+});
+
+let searchTimer;
+$("#q").addEventListener("input", (e) => {
+  state.query = e.target.value.trim();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    $$(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === "search")));
+    state.view = "search"; $("#ai-panel").hidden = true; $("#data-panel").hidden = true; $("#grid").hidden = false;
+    load(true);
+  }, 420);
+});
+$("#q").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    clearTimeout(searchTimer);
+    state.query = e.target.value.trim();
+    $$(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === "search")));
+    state.view = "search"; $("#ai-panel").hidden = true; $("#data-panel").hidden = true; $("#grid").hidden = false;
+    load(true);
+  }
+});
+
+$("#filters").addEventListener("toggle", (e) => { if (e.target.open) loadFilterOptions(); });
+
+function applyFilters() {
+  state.country = $("#f-country").value;
+  state.tag = $("#f-tag").value;
+  state.language = $("#f-lang").value.trim();
+  state.codec = $("#f-codec").value;
+  state.minBitrate = $("#f-bitrate").value;
+  state.order = $("#f-order").value;
+  $$(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === "search")));
+  state.view = "search"; $("#ai-panel").hidden = true; $("#data-panel").hidden = true; $("#grid").hidden = false;
+  load(true);
+}
+["#f-country","#f-tag","#f-codec","#f-bitrate","#f-order"].forEach(sel =>
+  $(sel).addEventListener("change", applyFilters));
+$("#f-lang").addEventListener("change", applyFilters);
+
+function syncJinaUI() {
+  $("#force-jina").checked = state.forceJina;
+  $("#jina-toggle-wrap").classList.toggle("on", state.forceJina);
+  updateProxyStatus();
+}
+$("#force-jina").addEventListener("change", (e) => {
+  state.forceJina = e.target.checked;
+  saveLS(LS.forceJina, state.forceJina);
+  syncJinaUI();
+  toast(state.forceJina ? "🛰️ All API calls will route through r.jina.ai" : "🌐 Direct API mode restored", 3000);
+});
+
+$("#grid").addEventListener("click", (e) => {
+  const countryCard = e.target.closest("[data-country]");
+  if (countryCard) {
+    const cc = countryCard.dataset.country;
+    state.country = cc;
+    $("#f-country").value = cc;
+    state.tag = ""; state.language = ""; state.codec = ""; state.minBitrate = "";
+    $("#f-tag").value = ""; $("#f-lang").value = ""; $("#f-codec").value = ""; $("#f-bitrate").value = "";
+    state.view = "search";
+    $$(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === "search")));
+    $("#data-panel").hidden = true; $("#grid").hidden = false;
+    load(true);
+    toast(`🌍 Browsing ${countryCard.dataset.name}`);
+    return;
+  }
+  const favBtn = e.target.closest("[data-fav]");
+  if (favBtn) { e.stopPropagation(); toggleFavorite(favBtn.dataset.fav); return; }
+  const card = e.target.closest(".card");
+  if (card && card.dataset.id) { const s = byId.get(card.dataset.id); if (s) playStation(s); }
+});
+$("#grid").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const card = e.target.closest(".card"); if (!card) return;
+  e.preventDefault();
+  if (card.dataset.country) { card.click(); return; }
+  if (card.dataset.id) { const s = byId.get(card.dataset.id); if (s) playStation(s); }
+});
+
+$("#more").addEventListener("click", loadMore);
+$("#load-all").addEventListener("click", loadAllStations);
+$("#clear-cache").addEventListener("click", clearCache);
+$("#sync-hexradio").addEventListener("click", syncHexRadioManual);
+
+$("#surprise").addEventListener("click", async () => {
+  $("#surprise").disabled = true;
+  try {
+    const list = await apiRetry("/json/stations/search", { order: "random", limit: 25, hidebroken: true });
+    const pool = Array.isArray(list) ? list : [];
+    const https = pool.find(s => /^https:\/\//i.test(streamUrl(s)));
+    const pick = https || pool[0];
+    if (!pick) { toast("No random station found — try again."); return; }
+    playStation(pick);
+  } catch { toast("Couldn't reach the radio directory. Try again."); }
+  finally { $("#surprise").disabled = false; }
+});
+
+$("#ai-go").addEventListener("click", () => {
+  const mood = $("#ai-prompt").value.trim();
+  if (!mood) { $("#ai-prompt").focus(); return; }
+  aiDiscover(mood, state.aiModel);
+});
+$("#ai-prompt").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#ai-go").click(); });
+
+$("#p-play").addEventListener("click", togglePlay);
+$("#p-close").addEventListener("click", stopPlayback);
+$("#p-fav").addEventListener("click", () => { if (state.current) toggleFavorite(state.current.stationuuid); });
+$("#p-dl").addEventListener("click", openExportModal);
+$("#p-art").addEventListener("click", () => { if (state.current) generateAIArt(state.current); });
+
+const vol = $("#vol");
+const savedVol = parseFloat(localStorage.getItem(LS.vol));
+vol.value = Number.isFinite(savedVol) ? savedVol : 0.8;
+audio.volume = parseFloat(vol.value);
+vol.addEventListener("input", () => {
+  audio.volume = parseFloat(vol.value);
+  try { localStorage.setItem(LS.vol, vol.value); } catch {}
+});
+
+audio.addEventListener("playing", () => { isPlaying = true; setPlayIcon(true); });
+audio.addEventListener("pause", () => { isPlaying = false; setPlayIcon(false); });
+audio.addEventListener("error", () => {
+  if (!state.current) return;
+  isPlaying = false; setPlayIcon(false);
+  toast("Stream error — station may be offline or blocked. Try another.");
+});
+
+document.addEventListener("keydown", (e) => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "select" || tag === "textarea") return;
+  if (e.code === "Space" && state.current) { e.preventDefault(); togglePlay(); }
+});
+
+if ("mediaSession" in navigator) {
+  try {
+    navigator.mediaSession.setActionHandler("play", () => togglePlay());
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+  } catch {}
+}
+
+setPlayIcon(false);
+
+/* ======================= boot ======================= */
+buildThemeGallery();
+buildCustomColorInputs();
+loadSettings();
+loadSavedTheme();
+bindDarkToggle();
+bindCustomReset();
+
+window.HEXTheme = {
+  applyTheme,
+  applySystemTheme,
+  applyCustomColors,
+  loadSavedTheme,
+  loadSettings,
+  applyDarkMode,
+  isDarkMode,
+  getCustomColors,
+  defaultCustomColors,
+  THEMES,
+  THEME_NAMES,
+};
+
+renderModelPills();
+resetAIStatus();
+syncJinaUI();
+buildFilterOptionsSelect();
+loadFFOpts();
+renderLibVersions();
+load(true);
+
+(async () => {
+  const n = await getCachedCount();
+  if (n) console.log(`[cache] ${n.toLocaleString()} stations cached locally`);
+})();
+
+(async () => {
+  try {
+    const count = await loadAllCountries();
+    if (count) console.log(`[countries] auto-loaded ${count}`);
+  } catch (e) { console.warn("auto countries failed", e); }
+})();
+
+setTimeout(() => { syncHexRadioSilent().catch(()=>{}); }, 2500);
+setInterval(() => { syncHexRadioSilent().catch(()=>{}); }, 15 * 60 * 1000);
+
+window.addEventListener("pageshow", () => {
+  if (state.current) $("#player").classList.add("show");
+});
+})();
+</script>
+</body>
+</html>
